@@ -26,7 +26,7 @@
 <http://example.org/ffonto#> rdf:type owl:Ontology ;
                               owl:versionIRI ffonto:V1.0 ;
                               cc:license "" ;
-                              dc:abstract "The Forest Fire Detection & Observation Ontology (FFONTO) is designed to integrate multi-modal sensor data for early fire detection. It serves as an extensible framework with 'ForestFire' as the root class, incorporating concepts for visual detection, audio monitoring, and environmental conditions."@en ;
+                              dc:abstract "The Forest Fire Ontology (FFONTO) is designed to integrate multi-modal sensor data for early fire detection. It serves as an extensible framework with 'ForestFire' as the root class, incorporating concepts for visual detection, audio monitoring, and environmental conditions."@en ;
                               dc:contributor [ foaf:name "Prof. Dulani Meedeniya"@en ;
                                                schema:identifier <https://orcid.org/0000-0002-4520-3819>
                                              ] ;
@@ -137,7 +137,6 @@ ffonto:FireImpact rdf:type owl:Class ;
 ffonto:EcologicalEffect rdf:type owl:Class ;
     rdfs:label "Ecological Effect" ;
     rdfs:comment "Long-term ecological changes resulting from environmental processes or disturbances." .
-
 
 ffonto:ForestFireEffect rdf:type owl:Class ;
     rdfs:label "Forest Fire Effect" .
@@ -1518,33 +1517,26 @@ ffonto:containsLandscapeFeatureOf a owl:ObjectProperty ;
 
 ffonto:containsLandscapeFeatureOf owl:inverseOf ffonto:containsLandscapeFeature .
 
-ffonto:influencesFireBehavior rdf:type owl:ObjectProperty ;
-    rdfs:label "influences fire behavior" ;
-    rdfs:comment "Indicates that a fuel type affects characteristics of fire behavior." ;
-    rdfs:domain ffonto:FuelType ;
-    rdfs:range ffonto:FireBehavior .
+# Meteorological influence
+ffonto:meteorologicalVariableAffectsRateOfSpread rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:MeteorologicalVariable ;
+    rdfs:range ffonto:RateOfSpread ;
+    owl:inverseOf ffonto:rateOfSpreadAffectedByMeteorologicalVariable .
 
-ffonto:influencesFireBehaviorOf rdf:type owl:ObjectProperty ;
-    rdfs:label "influences fire behavior of" ;
-    rdfs:comment "Inverse - Indicates that a fuel type affects characteristics of fire behavior." ;
-    rdfs:range ffonto:FuelType ;
-    rdfs:domain ffonto:FireBehavior .
+ffonto:rateOfSpreadAffectedByMeteorologicalVariable rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:RateOfSpread ;
+    rdfs:range ffonto:MeteorologicalVariable .
 
-ffonto:influencesFireBehaviorOf owl:inverseOf ffonto:influencesFireBehavior .
 
-ffonto:affectsFireSpread rdf:type owl:ObjectProperty ;
-    rdfs:label "affects fire spread" ;
-    rdfs:comment "Describes how environmental factors influence the spread of fire." ;
+# Environmental influence
+ffonto:environmentalFactorAffectsFireSpread rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:EnvironmentalFactor ;
-    rdfs:range ffonto:FireSpread .
+    rdfs:range ffonto:FireSpread ;
+    owl:inverseOf ffonto:fireSpreadAffectedByEnvironmentalFactor .
 
-ffonto:affectsFireSpreadOf rdf:type owl:ObjectProperty ;
-    rdfs:label "affects fire spread of" ;
-    rdfs:comment "Inverse - Describes how environmental factors influence the spread of fire." ;
-    rdfs:range ffonto:EnvironmentalFactor ;
-    rdfs:domain ffonto:FireSpread .
-
-ffonto:affectsFireSpreadOf owl:inverseOf ffonto:affectsFireSpread .
+ffonto:fireSpreadAffectedByEnvironmentalFactor rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:FireSpread ;
+    rdfs:range ffonto:EnvironmentalFactor .
 
 ffonto:causesEcologicalImpact rdf:type owl:ObjectProperty ;
     rdfs:label "causes ecological impact" ;
@@ -5342,7 +5334,7 @@ ffonto:hasObservation rdf:type owl:ObjectProperty ;
     rdfs:label "has observation" .
 
 ffonto:isObservationOf a owl:ObjectProperty ;
-    rdfs:range ffonto:FireEvent ;
+    rdfs:range ffonto:ForestFire ;
     rdfs:domain ffonto:Observation ;
     rdfs:label "inverse of is observation"@en .
 
@@ -5632,18 +5624,17 @@ ffonto:impairsVisibilityOf rdf:type owl:ObjectProperty ;
 
 ffonto:impairsVisibilityOf owl:inverseOf ffonto:impairsVisibility .
 
-ffonto:requiresEvacuation rdf:type owl:ObjectProperty ;
+ffonto:triggersEvacuationOrder rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:Hazard ;
     rdfs:range ffonto:EvacuationOrder ;
     rdfs:label "requires evacuation" ;
     rdfs:comment "If the hazard or conditions should prompt evacuation." .
 
-ffonto:requiresEvacuationOf a owl:ObjectProperty ;
-    rdfs:range ffonto:Hazard ;
+ffonto:isEvacuationOrderFor rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:EvacuationOrder ;
-    rdfs:label "inverse of requires evacuation"@en .
+    rdfs:range ffonto:Hazard .
 
-ffonto:requiresEvacuationOf owl:inverseOf ffonto:requiresEvacuation .
+ffonto:triggersEvacuationOrder owl:inverseOf ffonto:isEvacuationOrderFor .
 
 ffonto:hasTerrainFeature rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FireEvent ;
@@ -5693,7 +5684,7 @@ ffonto:hasAccessConstraint rdf:type owl:ObjectProperty ;
 ffonto:isAccessConstraintOf a owl:ObjectProperty ;
     rdfs:range ffonto:FireEvent ;
     rdfs:domain ffonto:AccessConstraintDetail ;
-    rdfs:label "inverse of is access constraint"@en .
+    rdfs:label "is access constraint of" .
 
 ffonto:isAccessConstraintOf owl:inverseOf ffonto:hasAccessConstraint .
 
@@ -5834,10 +5825,10 @@ ffonto:isSuppressionOperationOf a owl:ObjectProperty ;
 
 ffonto:isSuppressionOperationOf owl:inverseOf ffonto:hasSuppressionOperation .
 
-ffonto:affectsWildlife rdf:type owl:ObjectProperty ;
+ffonto:affectsWildlife a owl:ObjectProperty ;
     rdfs:domain ffonto:FireEvent ;
     rdfs:range ffonto:Wildlife ;
-    rdfs:label "affects wildlife" .
+    rdfs:label "affects wildlife"@en  .
 
 ffonto:affectsWildlifeOf a owl:ObjectProperty ;
     rdfs:range ffonto:FireEvent ;
@@ -7539,16 +7530,6 @@ ffonto:MeteorologicalVariable rdf:type owl:Class ;
     rdfs:subClassOf ffonto:WeatherFactor ;
     rdfs:label "Meteorological Variable" .
 
-ffonto:affectsFireSpread rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:MeteorologicalVariable ;
-    rdfs:range ffonto:RateOfSpread .
-
-ffonto:affectsFireSpreadOf rdf:type owl:ObjectProperty ;
-    rdfs:range ffonto:MeteorologicalVariable ;
-    rdfs:domain ffonto:RateOfSpread .
-
-ffonto:affectsFireSpreadOf owl:inverseOf ffonto:affectsFireSpread .
-
 ffonto:FireLine rdf:type owl:Class ;
     rdfs:label "Fire Line" ;
     rdfs:comment "Constructed control line to stop fire spread." .
@@ -8342,17 +8323,15 @@ ffonto:operatesEquipmentOf a owl:ObjectProperty ;
 
 ffonto:operatesEquipmentOf owl:inverseOf ffonto:operatesEquipment .
 
-ffonto:protects rdf:type owl:ObjectProperty ;
+ffonto:suppresses rdf:type owl:ObjectProperty ;
     rdfs:label "protects structure" ;
     rdfs:domain ffonto:HoseLine ;
     rdfs:range ffonto:StructureFire .
 
-ffonto:protectsOf rdf:type owl:ObjectProperty ;
-    rdfs:label "protects structure of" ;
+ffonto:isStructureFireSuppressedBy rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:StructureFire ;
     rdfs:range ffonto:HoseLine ;
-    rdfs:domain ffonto:StructureFire .
-
-ffonto:protectsOf owl:inverseOf ffonto:protects .
+    owl:inverseOf ffonto:suppresses .
 
 ffonto:crosses rdf:type owl:ObjectProperty ;
     rdfs:label "crosses location" ;
@@ -8490,19 +8469,19 @@ ffonto:isClothingOf rdf:type owl:ObjectProperty ;
 
 ffonto:isClothingOf owl:inverseOf ffonto:hasClothing .
 
-ffonto:protectsWith rdf:type owl:ObjectProperty ;
+ffonto:usesProtectionMethod rdf:type owl:ObjectProperty ;
     rdfs:label "protects with" ;
     rdfs:comment "Links a HomeProtectionMeasure to tools or actions used to protect the home (e.g., wetting roof, sealing vents)." ;
     rdfs:domain ffonto:HomeProtectionMeasure ;
     rdfs:range ffonto:EvacuationAction .
 
-ffonto:protectsOf rdf:type owl:ObjectProperty ;
+ffonto:isProtectionMethodOf rdf:type owl:ObjectProperty ;
     rdfs:label "protects of" ;
     rdfs:comment "Inverse - Links a HomeProtectionMeasure to tools or actions used to protect the home (e.g., wetting roof, sealing vents)." ;
     rdfs:range ffonto:HomeProtectionMeasure ;
     rdfs:domain ffonto:EvacuationAction .
 
-ffonto:protectsOf owl:inverseOf ffonto:protectsWith .
+ffonto:isProtectionMethodOf owl:inverseOf ffonto:usesProtectionMethod .
 
 ffonto:hasEvacuationRoute rdf:type owl:ObjectProperty ;
     rdfs:label "has evacuation route" ;
@@ -9776,15 +9755,15 @@ ffonto:FuelCharacteristic rdf:type owl:Class ;
     rdfs:label "Fuel Characteristic" ;
     rdfs:comment "Properties affecting how fuels burn." .
 
-ffonto:influencesFireBehavior rdf:type owl:ObjectProperty ;
+ffonto:influencesFireBehaviorByCharacteristic rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FuelCharacteristic ;
     rdfs:range ffonto:FireBehavior .
 
-ffonto:influencesFireBehaviorOf rdf:type owl:ObjectProperty ;
+ffonto:influencesFireBehaviorByCharacteristicOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:FuelCharacteristic ;
     rdfs:domain ffonto:FireBehavior .
 
-ffonto:influencesFireBehaviorOf owl:inverseOf ffonto:influencesFireBehavior .
+ffonto:influencesFireBehaviorByCharacteristicOf owl:inverseOf ffonto:influencesFireBehaviorByCharacteristic .
 
 ffonto:Topography rdf:type owl:Class ;
     rdfs:subClassOf ffonto:EnvironmentalFactor ;
@@ -11019,15 +10998,15 @@ ffonto:VegetationChemicalComponent rdf:type owl:Class ;
     rdfs:subClassOf ffonto:FuelCharacteristic ;
     rdfs:label "Vegetation Chemical Component" .
 
-ffonto:affectsCombustion rdf:type owl:ObjectProperty ;
+ffonto:chemicalComponentAffectsCombustion rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:VegetationChemicalComponent ;
     rdfs:range ffonto:CombustionProcess .
 
-ffonto:affectsCombustionOf rdf:type owl:ObjectProperty ;
-    rdfs:range ffonto:VegetationChemicalComponent ;
-    rdfs:domain ffonto:CombustionProcess .
+ffonto:isCombustionAffectedByChemicalComponent rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:CombustionProcess ;
+    rdfs:range ffonto:VegetationChemicalComponent .
 
-ffonto:affectsCombustionOf owl:inverseOf ffonto:affectsCombustion .
+ffonto:chemicalComponentAffectsCombustion owl:inverseOf ffonto:isCombustionAffectedByChemicalComponent .
 
 ffonto:SmokeColor rdf:type owl:Class ;
     rdfs:subClassOf ffonto:SmokePlume ;
@@ -11752,18 +11731,26 @@ ffonto:isFuelTypeOf rdf:type owl:ObjectProperty ;
 
 ffonto:isFuelTypeOf owl:inverseOf ffonto:hasFuelType .
 
-ffonto:influencesFireRisk rdf:type owl:ObjectProperty ;
-    rdfs:label "influences fire risk" ;
-    rdfs:comment "Indicates climate drivers affecting wildfire occurrence." ;
+# Flammability → Risk Assessment
+ffonto:flammabilityInfluencesRiskAssessment rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:SeasonalFlammability ;
+    rdfs:range ffonto:RiskAssessment ;
+    owl:inverseOf ffonto:isRiskAssessmentInfluencedByFlammability .
+
+ffonto:isRiskAssessmentInfluencedByFlammability rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:RiskAssessment ;
+    rdfs:range ffonto:SeasonalFlammability .
+
+
+# Climate → Fire Weather Index
+ffonto:climateDriverInfluencesFireWeatherIndex rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:ClimateDriver ;
-    rdfs:range ffonto:FireWeatherIndex .
+    rdfs:range ffonto:FireWeatherIndex ;
+    owl:inverseOf ffonto:isFireWeatherIndexInfluencedByClimateDriver .
 
-ffonto:influencesFireRiskOf a owl:ObjectProperty ;
-    rdfs:range ffonto:ClimateDriver ;
+ffonto:isFireWeatherIndexInfluencedByClimateDriver rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FireWeatherIndex ;
-    rdfs:label "inverse of influences fire risk"@en  .
-
-ffonto:influencesFireRiskOf owl:inverseOf ffonto:influencesFireRisk .
+    rdfs:range ffonto:ClimateDriver .
 
 ffonto:derivedRemoteSensingIndexFrom rdf:type owl:ObjectProperty ;
     rdfs:label "derived from" ;
@@ -12482,7 +12469,7 @@ ffonto:ConfinePets rdf:type ffonto:PetPreparation ;
 ffonto:WetRoofAndNearby rdf:type ffonto:HomeProtectionMeasure ;
     rdfs:label "Wet Roof and Nearby Vegetation" ;
     rdfs:comment "If time allows, wet roof and nearby shrubs to reduce ember ignition — note this is not a guaranteed defense." ;
-    ffonto:protectsWith ffonto:WetRoofAction .
+    ffonto:usesProtectionMethod ffonto:WetRoofAction .
 
 ffonto:WetRoofAction rdf:type ffonto:BeforeEvacuationAction ;
     rdfs:label "Wet Roof Action" ;
@@ -12491,7 +12478,7 @@ ffonto:WetRoofAction rdf:type ffonto:BeforeEvacuationAction ;
 ffonto:SealVents rdf:type ffonto:HomeProtectionMeasure ;
     rdfs:label "Seal Vents" ;
     rdfs:comment "Seal attic and ground vents with pre-cut plywood or commercial vent seals to reduce ember entry." ;
-    ffonto:protectsWith ffonto:SealVentsAction .
+    ffonto:usesProtectionMethod ffonto:SealVentsAction .
 
 ffonto:SealVentsAction rdf:type ffonto:BeforeEvacuationAction ;
     rdfs:label "Seal Vents Action" ;
@@ -12508,7 +12495,7 @@ ffonto:TurnOffPropane rdf:type ffonto:BeforeEvacuationAction ;
 ffonto:ShutOffGas rdf:type ffonto:HomeProtectionMeasure ;
     rdfs:label "Shut Off Gas at Meter" ;
     rdfs:comment "Turn off natural gas at the meter and extinguish pilot lights if told to and safe to do so." ;
-    ffonto:protectsWith ffonto:ShutOffGasAction .
+    ffonto:usesProtectionMethod ffonto:ShutOffGasAction .
 
 ffonto:ShutOffGasAction rdf:type ffonto:BeforeEvacuationAction ;
     rdfs:label "Shut Off Gas Action" ;
@@ -12584,12 +12571,12 @@ ffonto:ActionChooseRouteAwayFromFire rdf:type ffonto:ImmediateEvacuationAction ;
 ffonto:HomePrepInside rdf:type ffonto:HomeProtectionMeasure ;
     rdfs:label "Interior Home Prep" ;
     rdfs:comment "Close windows, vents, blinds; remove light curtains; shut off gas and pilot lights; move flammable furniture to center of rooms; turn on interior lights for visibility in smoke." ;
-    ffonto:protectsWith ffonto:ShutOffGasAction .
+    ffonto:usesProtectionMethod ffonto:ShutOffGasAction .
 
 ffonto:HomePrepOutside rdf:type ffonto:HomeProtectionMeasure ;
     rdfs:label "Exterior Home Prep" ;
     rdfs:comment "Seal vents, turn off propane tanks, remove combustibles within 10-30 feet, connect hoses, wet roof if possible, place lawn sprinklers on roof if safe, gather fire tools." ;
-    ffonto:protectsWith ffonto:SealVentsAction , ffonto:WetRoofAction , ffonto:TurnOffPropane .
+    ffonto:usesProtectionMethod ffonto:SealVentsAction , ffonto:WetRoofAction , ffonto:TurnOffPropane .
 
 ffonto:EvacuateBringDocs rdf:type ffonto:ImmediateEvacuationAction ;
     rdfs:label "Take Important Documents and Kit" ;
@@ -13418,7 +13405,7 @@ ffonto:FuelMoisture  rdfs:comment "The moisture content of combustible vegetatio
  ffonto:heavyEquipmentInUse  rdfs:comment "Indicates that heavy machinery (e.g., dozers, graders) is being employed on-site."@en .
  ffonto:usesTechnology  rdfs:comment "Denotes that technology or technical systems are utilized within an activity."@en .
  ffonto:implementsPSPS  rdfs:comment "Indicates execution of Public Safety Power Shutoff procedures to reduce fire ignition risk."@en .
- ffonto:protects  rdfs:comment "A general relation indicating that an entity provides protection to another."@en .
+ ffonto:suppresses  rdfs:comment "A general relation indicating that an entity provides protection to another."@en .
  ffonto:hasEnvironmentalCondition  rdfs:comment "Associates an entity with prevailing environmental variables or states."@en .
  ffonto:reachedAgriculturalLand  rdfs:comment "Indicates that fire or hazard has spread into agricultural areas."@en .
  ffonto:managedBy  rdfs:comment "Associates an entity or operation with the responsible managing organization or agency."@en .
@@ -13596,7 +13583,7 @@ ffonto:isBurnSeverityOf rdfs:comment "Inverse relation linking a burn severity c
 ffonto:providesEcosystemServiceOf rdfs:comment "Inverse relation indicating that an entity supplies a particular ecosystem service to another."@en .
 ffonto:favorsSpeciesOf rdfs:comment "Inverse relation indicating that conditions support or promote a species in an area."@en .
 ffonto:audioEventOf rdfs:comment "Inverse relation linking an audio-recorded event to the source or subject it documents."@en .
-ffonto:influencesFireRiskOf rdfs:comment "Inverse relation indicating that an entity affects fire risk for a specified target."@en .
+ffonto:isFireRiskInfluencedBy rdfs:comment "Inverse relation indicating that an entity affects fire risk for a specified target."@en .
 ffonto:occursInTerrainOf rdfs:comment "Inverse relation linking occurrences to the terrain types where they take place."@en .
 ffonto:isFireSusceptibilityOf rdfs:comment "Inverse relation linking a susceptibility assessment to the landscape or asset it describes."@en .
 ffonto:affectsOf rdfs:comment "Inverse relation indicating what entities or systems are affected by a given cause."@en .
@@ -13731,7 +13718,6 @@ ffonto:partOfBuildingOf rdfs:comment "Inverse relation linking building componen
 ffonto:createsHazardOf rdfs:comment "Inverse relation linking hazards back to the actions or conditions that create them."@en .
 ffonto:enhancesEcosystemServiceOf rdfs:comment "Inverse relation linking enhanced ecosystem services back to the management actions that produce them."@en .
 ffonto:appliesToWaterOf rdfs:comment "Inverse relation linking applicability of policies or measures to specific water resources."@en .
-ffonto:requiresEvacuationOf rdfs:comment "Inverse relation linking required evacuations back to the orders or conditions that triggered them."@en .
 ffonto:gatheringAtOf rdfs:comment "Inverse relation linking gatherings back to the locations or assembly points where they occur."@en .
 ffonto:isVegetationDistributionOf rdfs:comment "Inverse relation linking vegetation distribution descriptions back to the mapped areas they describe."@en .
 ffonto:structureAffectedOf rdfs:comment "Inverse relation linking affected structures back to the incidents or hazards impacting them."@en .
@@ -13954,15 +13940,6 @@ ffonto:isDetectedBy rdf:type owl:ObjectProperty ;
 ffonto:CanaryDeployment rdf:type owl:Class ;
     rdfs:subClassOf ffonto:CyberSecurityPractice .
 
-ffonto:monitorsSystem rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:CanaryDeployment ;
-    rdfs:range ffonto:DecisionSupportSystem ;
-    owl:inverseOf ffonto:isMonitoredBy .
-
-ffonto:isMonitoredBy rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:DecisionSupportSystem ;
-    rdfs:range ffonto:CanaryDeployment .
-
 ffonto:Radio rdf:type owl:Class ;
     rdfs:subClassOf ffonto:CommunicationDevice .
 
@@ -13978,15 +13955,6 @@ ffonto:usesRadio rdf:type owl:ObjectProperty ;
 ffonto:AccessConstraint rdf:type owl:Class ;
     rdfs:subClassOf ffonto:PrivacyProtection .
 
-ffonto:restrictsAccessTo rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:AccessConstraint ;
-    rdfs:range ffonto:DataRepository ;
-    owl:inverseOf ffonto:hasAccessConstraint .
-
-ffonto:hasAccessConstraint rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:DataRepository ;
-    rdfs:range ffonto:AccessConstraint .
-
 ffonto:observesProperty rdf:type owl:ObjectProperty ;
     rdfs:domain sosa:Sensor ;
     rdfs:range ffonto:MeteorologicalVariable ;
@@ -14001,12 +13969,12 @@ ffonto:SuppressionTactic rdf:type owl:Class ;
 
 ffonto:appliedToFire rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:SuppressionTactic ;
-    rdfs:range ffonto:FireFront ;
-    owl:inverseOf ffonto:isSuppressedBy .
+    rdfs:range ffonto:FireFront .
 
-ffonto:isSuppressedBy rdf:type owl:ObjectProperty ;
+ffonto:isFireFrontSuppressedBy rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FireFront ;
-    rdfs:range ffonto:SuppressionTactic .
+    rdfs:range ffonto:SuppressionTactic ;
+    owl:inverseOf ffonto:appliedToFire .
 
 ffonto:RespiratoryDisease rdf:type owl:Class ;
     rdfs:subClassOf ffonto:RespiratoryIssue .
@@ -14177,27 +14145,34 @@ ffonto:healthAffectedByPM25 rdf:type owl:ObjectProperty ;
 
 ffonto:WildlifeImpact rdfs:subClassOf ffonto:EnvironmentalImpact .
 
-ffonto:affectsWildlife
-    rdf:type owl:ObjectProperty ;
+# Fire affects wildlife
+ffonto:fireEventAffectsWildlife rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:FireEvent ;
+    rdfs:range ffonto:Wildlife ;
+    rdfs:label "fire affects wildlife" .
+
+
+# Impact affects wildlife
+ffonto:impactAffectsWildlife rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:WildlifeImpact ;
     rdfs:range ffonto:Wildlife ;
-    owl:inverseOf ffonto:isAffectedByWildfire .
+    owl:inverseOf ffonto:isWildlifeAffectedByImpact .
 
-ffonto:isAffectedByWildfire
-    rdf:type owl:ObjectProperty ;
+ffonto:isWildlifeAffectedByImpact rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:Wildlife ;
     rdfs:range ffonto:WildlifeImpact .
 
 ffonto:EvacuationZone rdfs:subClassOf geo:SpatialObject .
 
-ffonto:requiresEvacuation
+ffonto:requiresEvacuationZone rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:WildfireIncident ;
-    rdfs:range ffonto:EvacuationZone ;
-    owl:inverseOf ffonto:isEvacuationZoneFor .
+    rdfs:range ffonto:EvacuationZone .
 
-ffonto:isEvacuationZoneFor
+ffonto:isEvacuationZoneFor rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:EvacuationZone ;
     rdfs:range ffonto:WildfireIncident .
+
+ffonto:requiresEvacuationZone owl:inverseOf ffonto:isEvacuationZoneFor .
 
 ffonto:FirePerimeter rdfs:subClassOf geo:SpatialObject .
 
@@ -14210,18 +14185,26 @@ ffonto:isPerimeterOf
     rdfs:domain ffonto:FirePerimeter ;
     rdfs:range ffonto:WildfireIncident .
 
-ffonto:WeatherFactor rdfs:subClassOf ffonto:MeteorologicalVariable .
-
-ffonto:influencesFireBehavior
+# Weather influence
+ffonto:weatherInfluencesFireBehaviorModel rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:WeatherFactor ;
     rdfs:range ffonto:FireBehaviorModel ;
-    owl:inverseOf ffonto:isInfluencedByWeather .
+    owl:inverseOf ffonto:isFireBehaviorModelInfluencedByWeather .
 
-ffonto:isInfluencedByWeather
+ffonto:isFireBehaviorModelInfluencedByWeather rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FireBehaviorModel ;
     rdfs:range ffonto:WeatherFactor .
 
-ffonto:SafetyMeasure rdfs:subClassOf ffonto:PreventionMeasure .
+
+# Fuel influence
+ffonto:fuelInfluencesFireBehavior rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:FuelType ;
+    rdfs:range ffonto:FireBehavior ;
+    owl:inverseOf ffonto:isFireBehaviorInfluencedByFuel .
+
+ffonto:isFireBehaviorInfluencedByFuel rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:FireBehavior ;
+    rdfs:range ffonto:FuelType .
 
 ffonto:protectsAgainst
     rdfs:domain ffonto:SafetyMeasure ;
@@ -14231,8 +14214,6 @@ ffonto:protectsAgainst
 ffonto:isMitigatedBy
     rdfs:domain ffonto:WildfireIncident ;
     rdfs:range ffonto:SafetyMeasure .
-
-ffonto:EmissionInventory rdfs:subClassOf ffonto:CarbonEmission .
 
 ffonto:recordsEmission
     rdfs:domain ffonto:EmissionInventory ;
@@ -14357,8 +14338,7 @@ ffonto:FlameLength rdfs:subClassOf ffonto:FireBehaviorMetric .
 
 ffonto:describesFlame
     rdfs:domain ffonto:FlameLength ;
-    rdfs:range ffonto:FireFront ;
-    owl:inverseOf ffonto:hasFlameLength .
+    rdfs:range ffonto:FireFront .
 
     ffonto:AirCleaner rdfs:subClassOf ffonto:AirQualityMitigationDevice .
 
@@ -14460,14 +14440,24 @@ ffonto:partOfWildfire
 
 ffonto:ModelMonitoring rdfs:subClassOf ffonto:MLOpsPipeline .
 
-ffonto:monitorsModel
-    rdf:type owl:ObjectProperty ;
+# System monitoring
+ffonto:monitorsSystem rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:CanaryDeployment ;
+    rdfs:range ffonto:DecisionSupportSystem ;
+    owl:inverseOf ffonto:isSystemMonitoredBy .
+
+ffonto:isSystemMonitoredBy rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:DecisionSupportSystem ;
+    rdfs:range ffonto:CanaryDeployment .
+
+
+# Model monitoring
+ffonto:monitorsModel rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:ModelMonitoring ;
     rdfs:range ffonto:FireBehaviorModel ;
-    owl:inverseOf ffonto:isMonitoredBy .
-    
-ffonto:isMonitoredBy
-    rdf:type owl:ObjectProperty ;
+    owl:inverseOf ffonto:isModelMonitoredBy .
+
+ffonto:isModelMonitoredBy rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FireBehaviorModel ;
     rdfs:range ffonto:ModelMonitoring .
 
@@ -14493,13 +14483,6 @@ ffonto:explainsModelPrediction
     owl:inverseOf ffonto:isExplainedBy .
 
     ffonto:SeasonalFlammability rdfs:subClassOf ffonto:FuelCharacteristic .
-
-ffonto:influencesFireRisk
-    rdfs:domain ffonto:SeasonalFlammability ;
-    rdfs:range ffonto:RiskAssessment ;
-    owl:inverseOf ffonto:isInfluencedByFlammability .
-
-    ffonto:CarbonEmission rdfs:subClassOf ffonto:EmissionEstimate .
 
 ffonto:releasedDuringFire
     rdfs:domain ffonto:CarbonEmission ;
@@ -14641,17 +14624,37 @@ ffonto:collectsEnvironmentalData
 
     ffonto:TemporaryFlightRestriction rdfs:subClassOf ffonto:AirspaceManagement .
 
-ffonto:restrictsAirspace
+# Access control
+ffonto:restrictsAccessTo rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:AccessConstraint ;
+    rdfs:range ffonto:DataRepository ;
+    owl:inverseOf ffonto:isAccessRestrictedBy .
+
+ffonto:isAccessRestrictedBy rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:DataRepository ;
+    rdfs:range ffonto:AccessConstraint .
+
+# Airspace restriction
+ffonto:restrictsAirspace rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:TemporaryFlightRestriction ;
     rdfs:range ffonto:Airspace ;
-    owl:inverseOf ffonto:isRestrictedBy .
+    owl:inverseOf ffonto:isAirspaceRestrictedBy .
+
+ffonto:isAirspaceRestrictedBy rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:Airspace ;
+    rdfs:range ffonto:TemporaryFlightRestriction .
 
     ffonto:FuelMoisture rdfs:subClassOf ffonto:FuelCharacteristic .
 
-ffonto:affectsCombustion
+ffonto:fuelMoistureAffectsCombustion rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FuelMoisture ;
-    rdfs:range ffonto:CombustionProcess ;
-    owl:inverseOf ffonto:isAffectedByFuelMoisture .
+    rdfs:range ffonto:CombustionProcess .
+
+ffonto:isCombustionAffectedByFuelMoisture rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:CombustionProcess ;
+    rdfs:range ffonto:FuelMoisture .
+
+ffonto:fuelMoistureAffectsCombustion owl:inverseOf ffonto:isCombustionAffectedByFuelMoisture .
 
     ffonto:NeighborSupportPlan rdfs:subClassOf ffonto:CommunityPreparednessPlan .
 
