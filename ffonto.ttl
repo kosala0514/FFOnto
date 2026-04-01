@@ -34,7 +34,7 @@
                                            schema:identifier <https://orcid.org/0009-0003-5790-62840>
                                          ] ;
                               dc:description "This ontology describes forest fire detection observations including image, audio, and weather data."@en ;
-                              dc:title "Forest Fire Detection & Observation Ontology (FFONTO)"@en ;
+                              dc:title "Forest Fire Ontology (FFONTO)"@en ;
                               dcterms:issued "2026-01-27"^^xsd:date ;
                               dcterms:license "" ;
                               vann:preferredNamespacePrefix "ffonto"@en ;
@@ -64,7 +64,7 @@ ffonto:ForestFire rdf:type owl:Class ;
 
 ffonto:WildfireScene rdf:type owl:Class ;
     rdfs:label "Wildfire Scene" ;
-    rdfs:comment "The operational environment where wildfire response activities occur." .
+    rdfs:comment "The environmental context where a wildfire event occurs and observations are made." .
 
 ffonto:ControlledBurn rdf:type owl:Class ;
     rdfs:subClassOf ffonto:FireEvent ;
@@ -1013,13 +1013,13 @@ ffonto:isTreeSpeciesOf owl:inverseOf ffonto:hasTreeSpecies .
 
 ffonto:occursIn rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FireEvent ;
-    rdfs:range ffonto:ForestEcosystem ;
+    rdfs:range ffonto:WildfireScene ;
     rdfs:label "occurs in" ;
     rdfs:comment "Specifies the forest ecosystem where a fire event takes place." .
 
 ffonto:occurs rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:FireEvent ;
-    rdfs:domain ffonto:ForestEcosystem ;
+    rdfs:domain ffonto:WildfireScene ;
     rdfs:label "occurs" ;
     rdfs:comment "Inverse - Specifies the forest ecosystem where a fire event takes place." .
 
@@ -1101,7 +1101,8 @@ ffonto:promotesRegenerationOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:FireEvent ;
     rdfs:domain ffonto:ForestRegeneration ;
     rdfs:label "promotes regeneration of" ;
-    rdfs:comment "Inverse - Fire can stimulate forest regrowth." .
+    rdfs:comment "Inverse - Fire can stimulate forest regrowth." ;
+    owl:inverseOf ffonto:promotesRegeneration .
 
 ffonto:hasFuel rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:ForestFire ;
@@ -1231,7 +1232,8 @@ ffonto:isFuelLoadIOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:SpatialUnit ;
     rdfs:domain ffonto:FuelLoad ;
     rdfs:label "is fuel load of" ;
-    rdfs:comment "Amount/type of fuel present in a spatial unit or vegetation patch." .
+    rdfs:comment "Amount/type of fuel present in a spatial unit or vegetation patch." ;
+    owl:inverseOf ffonto:hasFuelLoad .
 
 ffonto:hasIgnitionSource rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FireEvent ;
@@ -1519,13 +1521,13 @@ ffonto:containsLandscapeFeatureOf owl:inverseOf ffonto:containsLandscapeFeature 
 
 # Meteorological influence
 ffonto:meteorologicalVariableAffectsRateOfSpread rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:MeteorologicalVariable ;
+    rdfs:domain ffonto:MeteorologicalObservation ;
     rdfs:range ffonto:RateOfSpread ;
     owl:inverseOf ffonto:rateOfSpreadAffectedByMeteorologicalVariable .
 
 ffonto:rateOfSpreadAffectedByMeteorologicalVariable rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:RateOfSpread ;
-    rdfs:range ffonto:MeteorologicalVariable .
+    rdfs:range ffonto:MeteorologicalObservation .
 
 
 # Environmental influence
@@ -1878,12 +1880,6 @@ ffonto:resinContent rdf:type owl:DatatypeProperty ;
     rdfs:label "resin content" ;
     rdfs:comment "Represents the amount of resin in a tree species which contributes to flammability." .
 
-ffonto:fireTemperature rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:FireEvent ;
-    rdfs:range xsd:decimal ;
-    rdfs:label "fire temperature" ;
-    rdfs:comment "Indicates the temperature reached during a fire event." .
-
 ffonto:burnedAreaSize rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:FireEvent ;
     rdfs:range xsd:decimal ;
@@ -1955,12 +1951,6 @@ ffonto:burnDurationHours rdf:type owl:DatatypeProperty ;
     rdfs:range xsd:decimal ;
     rdfs:label "burn duration (hours)" ;
     rdfs:comment "Duration of the fire event measured in hours." .
-
-ffonto:burnTemperatureC rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:FireEvent ;
-    rdfs:range xsd:decimal ;
-    rdfs:label "burn temperature (°C)" ;
-    rdfs:comment "Representative temperature reached during the fire." .
 
 ffonto:smokePM25 rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:ParticulateMatter ;
@@ -2701,6 +2691,7 @@ ffonto:AshFall
 
 ffonto:Location
     a owl:Class ;
+    rdfs:subClassOf ffonto:ObservableProperty ;
     rdfs:label "Location"@en ;
     rdfs:comment "Generic geographic area or site (field, orchard, region, coordinate) where produce is produced."@en .
 
@@ -2723,6 +2714,50 @@ ffonto:Observation
     a owl:Class ;
     rdfs:label "Observation" ;
     rdfs:comment "An observation or record about conditions at a wildfire scene." .
+
+ffonto:ObservableProperty a owl:Class ;
+    rdfs:label "ObservableProperty" ;
+    rdfs:comment "Observable Property." .
+
+ffonto:smoke a ffonto:ObservableProperty .
+ffonto:fire a ffonto:ObservableProperty .
+ffonto:temperature a ffonto:ObservableProperty .
+ffonto:humidity a ffonto:ObservableProperty .
+
+ffonto:Result
+    a owl:Class ;
+    rdfs:label "Result" ;
+    rdfs:comment "Results got from observation at a wildfire scene." .
+
+ffonto:Annotation a owl:Class ;
+    rdfs:label "Annotation" ;
+    rdfs:comment "Additional information derived from data, not a direct physical observation." .
+
+ffonto:TextAnnotation a owl:Class ;
+    rdfs:subClassOf ffonto:Annotation ;
+    rdfs:label "Text Annotation" ;
+    rdfs:comment "Textual annotation such as captions or descriptions." .
+
+ffonto:MLModel a owl:Class ;
+    rdfs:label "Machine Learning Model" ;
+    rdfs:comment "A model used to generate annotations or results." .
+
+ffonto:ModelExecution a owl:Class ;
+    rdfs:label "Model Execution" ;
+    rdfs:comment "A specific run of a model on data." .
+
+ffonto:DetectionResult
+    a owl:Class ;
+    rdfs:subClassOf ffonto:Result ;
+    rdfs:subClassOf ffonto:ModelOutput ;
+    rdfs:label "DetectionResult" ;
+    rdfs:comment "Classification or detection outputs (e.g., smoke, fire)." .
+
+ffonto:MeasurementResult
+    a owl:Class ;
+    rdfs:subClassOf ffonto:Result ;
+    rdfs:label "MeasurementResult" ;
+    rdfs:comment "Numeric or measured values (e.g., temperature, humidity)." .
 
 ffonto:UtilityInfrastructure
     a owl:Class ;
@@ -3040,7 +3075,7 @@ ffonto:extractedFrom rdf:type owl:ObjectProperty ;
 
 ffonto:extractedOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:WellWater ;
-    rdfs:domian ffonto:Groundwater ;
+    rdfs:domain ffonto:Groundwater ;
     rdfs:label "extracted of" ;
     rdfs:comment "Inverse - Indicates that well water is extracted from groundwater." .
 
@@ -3117,7 +3152,8 @@ ffonto:affectsVegetationOf
     rdfs:label "affects vegetation of" ;
     rdfs:comment "Inverse - Indicates wildfire effects on vegetation." ;
     rdfs:range ffonto:WildfireScene ;
-    rdfs:domain ffonto:Vegetation . 
+    rdfs:domain ffonto:Vegetation ;
+    owl:inverseOf ffonto:affectsVegetation .
 
 ffonto:hasFireDriver
     a owl:ObjectProperty ;
@@ -3638,7 +3674,8 @@ ffonto:positionedBetweenOf rdf:type owl:ObjectProperty ;
     rdfs:label "positioned between" ;
     rdfs:range ffonto:Responder ;
     rdfs:domain ffonto:StructureFire ;
-    rdfs:comment "Inverse - Resources placed between fire and a structure to protect it." .
+    rdfs:comment "Inverse - Resources placed between fire and a structure to protect it." ;
+    owl:inverseOf ffonto:positionedBetween .
 
 ffonto:protectingAsset rdf:type owl:ObjectProperty ;
     rdfs:label "protecting asset" ;
@@ -3727,10 +3764,11 @@ ffonto:mediaKeptAtDistance rdf:type owl:ObjectProperty ;
 
 ffonto:mediaKeptAtDistanceOf rdf:type owl:ObjectProperty ;
     rdfs:label "media kept at distance of" ;
-    rdfs:ranger ffonto:Responder ;
+    rdfs:range ffonto:Responder ;
     rdfs:domain ffonto:MediaGroup ;
     rdfs:comment "Inverse - Indicates media/observers are held at a safe distance by responders." .
 
+ffonto:mediaKeptAtDistance owl:inverseOf ffonto:mediaKeptAtDistanceOf .
 #################################################################
 # Data Properties
 #################################################################
@@ -4736,6 +4774,24 @@ ffonto:waterContaminationRisk
     rdfs:domain ffonto:WaterBody ;
     rdfs:range xsd:boolean .
 
+ffonto:value a owl:DatatypeProperty ;
+    rdfs:domain ffonto:Result ;
+    rdfs:range xsd:float ;
+    rdfs:label "value" ;
+    rdfs:comment "The numeric or literal value of the observed property." .
+
+ffonto:unit a owl:DatatypeProperty ;
+    rdfs:domain ffonto:Result ;
+    rdfs:range xsd:string ;
+    rdfs:label "unit" ;
+    rdfs:comment "" .
+
+ffonto:confidence a owl:DatatypeProperty ;
+    rdfs:domain ffonto:Result ;
+    rdfs:range xsd:float ;
+    rdfs:label "confidence" ;
+    rdfs:comment "Confidence score associated with the result." .
+
 #################################################################
 # Safety and Risk Assessment CQ
 
@@ -4787,6 +4843,7 @@ ffonto:Communication
 
 ffonto:AudioObservation
     a owl:Class ;
+    rdfs:subClassOf ffonto:Observation ;
     rdfs:label "Audio Observation" ;
     rdfs:comment "Observation derived from audio captured at the wildfire scene." .
 
@@ -5329,16 +5386,58 @@ ffonto:recommendedOf a owl:ObjectProperty ;
 ffonto:recommendedOf owl:inverseOf ffonto:recommendedFor .
 
 ffonto:hasObservation rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:ForestFire ;
+    rdfs:domain ffonto:FireEvent ;
     rdfs:range ffonto:Observation ;
     rdfs:label "has observation" .
 
 ffonto:isObservationOf a owl:ObjectProperty ;
-    rdfs:range ffonto:ForestFire ;
+    rdfs:range ffonto:FireEvent ;
     rdfs:domain ffonto:Observation ;
     rdfs:label "inverse of is observation"@en .
 
 ffonto:isObservationOf owl:inverseOf ffonto:hasObservation .
+
+ffonto:hasResult rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range ffonto:Result ;
+    rdfs:label "has result" .
+
+ffonto:isResultOf a owl:ObjectProperty ;
+    rdfs:range ffonto:Observation ;
+    rdfs:domain ffonto:Result ;
+    rdfs:label "inverse of has result"@en .
+
+ffonto:isResultOf owl:inverseOf ffonto:hasResult .
+
+ffonto:hasAnnotation a owl:ObjectProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range ffonto:Annotation ;
+    rdfs:label "has annotation" ;
+    rdfs:comment "Links an observation to an annotation derived from it." .
+
+ffonto:isAnnotationOf a owl:ObjectProperty ;
+    rdfs:range ffonto:Observation ;
+    rdfs:domain ffonto:Annotation ;
+    rdfs:label "is annotation of" ;
+    rdfs:comment "inverse of has annotation" .
+
+ffonto:hasAnnotation owl:inverseOf ffonto:isAnnotationOf .
+
+ffonto:observedProperty a owl:ObjectProperty ;
+    rdfs:domain ffonto:Result ;
+    rdfs:range ffonto:ObservableProperty ;
+    rdfs:label "observed property" ;
+    rdfs:comment "The property that was observed or estimated." .
+
+ffonto:isEvidenceFor a owl:ObjectProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range ffonto:FireEvent .
+
+ffonto:hasEvidence a owl:ObjectProperty ;
+    rdfs:domain ffonto:FireEvent ;
+    rdfs:range ffonto:Observation .
+
+ffonto:isEvidenceFor owl:inverseOf ffonto:hasEvidence .
 
 ffonto:hasEnvironmentalCondition rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FireEvent ;
@@ -6375,8 +6474,13 @@ ffonto:smokeExposureDuration
 
 ffonto:audioDuration rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:AudioObservation ;
-    rdfs:range xsd:integer ;
+    rdfs:range xsd:decimal ;
     rdfs:label "audio duration (seconds)" .
+
+ffonto:audioDurationMs rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:AudioObservation ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "audio duration (mili seconds)" .
 
 ffonto:hasCracklingSound rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:AudioObservation ;
@@ -6473,17 +6577,6 @@ ffonto:hasPhoneNumber rdf:type owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:label "phone number" ;
     rdfs:comment "Stores the phone number of an emergency contact or hotline." .
-
-ffonto:hasSmokeDensity rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ForestFire ;
-    rdfs:range xsd:string ;
-    rdfs:label "has smoke density level" ;
-    rdfs:comment "Describes the density of smoke affecting visibility." .
-
-ffonto:hasTemperature rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ForestFire ;
-    rdfs:range xsd:decimal ;
-    rdfs:label "has temperature" .
 
 ffonto:hasFlameLength rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:FireBehavior ;
@@ -6627,11 +6720,6 @@ ffonto:medicalUnitsStaged rdf:type owl:DatatypeProperty ;
     rdfs:label "medical/EMS units staged visibly" ;
     rdfs:domain ffonto:FireEvent ;
     rdfs:range xsd:boolean .
-
-ffonto:ambientTemperatureC rdf:type owl:DatatypeProperty ;
-    rdfs:label "ambient temperature (C)" ;
-    rdfs:domain ffonto:FireEvent ;
-    rdfs:range xsd:decimal .
 
 ffonto:relativeHumidityPercent rdf:type owl:DatatypeProperty ;
     rdfs:label "relative humidity (%)" ;
@@ -7219,9 +7307,9 @@ ffonto:FireProbabilityModel rdf:type owl:Class ;
     rdfs:label "Fire Probability Model" ;
     rdfs:comment "Model output describing fire probability for an image/frame." .
 
-ffonto:FuelMoistureIndex rdf:type owl:Class ;
-    rdfs:subClassOf ffonto:Observation ;
-    rdfs:label "Fuel Moisture & Fire Weather Indices" ;
+ffonto:FireWeatherRecord rdf:type owl:Class ;
+    rdfs:subClassOf ffonto:WeatherObservation ;
+    rdfs:label "Fuel Moisture & Fire Weather Records" ;
     rdfs:comment "FFMC, ISI, DMC, DC, BUI, FWI values used to assess spread potential." .
 
 ffonto:Contact rdf:type owl:Class ;
@@ -7248,6 +7336,11 @@ ffonto:Trend rdf:type owl:Class ;
     rdfs:label "Trend (enum)" ;
     rdfs:comment "Temporal trend: increasing, decreasing, stable." .
 
+ffonto:MediaAsset rdf:type owl:Class ;
+    rdfs:label "Media Asset" ;
+    rdfs:comment "Represents an media file (audio/image) and its metadata (resolution, checksum, georef, path, license, etc.)." .
+
+
 ffonto:ImageAsset rdf:type owl:Class ;
     rdfs:label "Image Asset" ;
     rdfs:comment "Represents an image file and its metadata (resolution, checksum, georef, path, license, etc.)." .
@@ -7258,10 +7351,12 @@ ffonto:ImageQualityMetadata rdf:type owl:Class ;
 
 ffonto:CaptionModelOutput rdf:type owl:Class ;
     rdfs:label "Caption Model Output" ;
+    owl:subClassOf ffonto:ModelOutput ;
     rdfs:comment "Text caption produced by an image captioning model and related descriptors." .
 
 ffonto:VisionModelScores rdf:type owl:Class ;
     rdfs:label "Vision Model Scores" ;
+    owl:subClassOf ffonto:ModelOutput ;
     rdfs:comment "Scores produced by a vision classifier/model (fire/smoke/no-fire etc.) and the producing model name/version." .
 
 ffonto:SmokeLayerObservation rdf:type owl:Class ;
@@ -7284,12 +7379,13 @@ ffonto:CloudCoverQuality rdf:type owl:Class ;
     rdfs:label "Cloud Cover Quality Metadata" ;
     rdfs:comment "Quality metadata for cloud cover field (presence/absence of quality flag)." .
 
-ffonto:Label rdf:type owl:Class ;
-    rdfs:label "Label" ;
+ffonto:PredictedLabel rdf:type owl:Class ;
+    rdfs:label "PredictedLabel" ;
     rdfs:comment "A human or automatic label assigned to an image record (e.g., severity, content label)." .
 
 ffonto:LabelAssignment rdf:type owl:Class ;
     rdfs:label "Label Assignment" ;
+    rdfs:subClassOf ffonto:ModelOutput ;
     rdfs:comment "Represents the association of a Label to an ImageAsset, including source and count." .
 
 ffonto:AudioRecord rdf:type owl:Class ;
@@ -7526,9 +7622,10 @@ ffonto:SpotFire rdf:type owl:Class ;
 ffonto:RateOfSpread rdf:type owl:Class ;
     rdfs:label "Rate of Spread" .
 
-ffonto:MeteorologicalVariable rdf:type owl:Class ;
+ffonto:MeteorologicalObservation rdf:type owl:Class ;
     rdfs:subClassOf ffonto:WeatherFactor ;
-    rdfs:label "Meteorological Variable" .
+    rdfs:subClassOf ffonto:WeatherObservation ;
+    rdfs:label "Meteorological Observation" .
 
 ffonto:FireLine rdf:type owl:Class ;
     rdfs:label "Fire Line" ;
@@ -7786,18 +7883,18 @@ ffonto:modeledOf rdf:type owl:ObjectProperty ;
 
 ffonto:modeledOf owl:inverseOf ffonto:modeledBy .
 
-ffonto:hasImageAsset rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:FireEvent ;
-    rdfs:range ffonto:ImageAsset ;
-    rdfs:label "has image asset" ;
-    rdfs:comment "Connects incident to the captured image and its metadata." .
+ffonto:hasMediaAsset rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range ffonto:MediaAsset ;
+    rdfs:label "has media asset" ;
+    rdfs:comment "Connects incident to the captured media file." .
 
-ffonto:isImageAssetOf a owl:ObjectProperty ;
-    rdfs:range ffonto:FireEvent ;
-    rdfs:domain ffonto:ImageAsset ;
-    rdfs:label "inverse of is image asset"@en .
+ffonto:isMediaAssetOf a owl:ObjectProperty ;
+    rdfs:range ffonto:Observation ;
+    rdfs:domain ffonto:MediaAsset ;
+    rdfs:label "inverse of has media asset"@en .
 
-ffonto:isImageAssetOf owl:inverseOf ffonto:hasImageAsset .
+ffonto:isMediaAssetOf owl:inverseOf ffonto:hasMediaAsset .
 
 ffonto:hasImageQualityMeta rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:ImageAsset ;
@@ -7826,19 +7923,21 @@ ffonto:captionProducedOf rdf:type owl:ObjectProperty ;
 
 ffonto:captionProducedOf owl:inverseOf ffonto:producedCaptionBy .
 
-ffonto:hasVisionScores rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+ffonto:hasVisionModelScores rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range ffonto:VisionModelScores ;
-    rdfs:label "has vision model scores" ;
-    rdfs:comment "Links image to vision/classification scores and producing model." .
+    rdfs:label "has vision model scores" .
 
-ffonto:isVisionScoresOf rdf:type owl:ObjectProperty ;
-    rdfs:range ffonto:ImageAsset ;
+ffonto:isVisionModelScoresOf rdf:type owl:ObjectProperty ;
+    rdfs:range ffonto:ImageObservation ;
     rdfs:domain ffonto:VisionModelScores ;
-    rdfs:label "is vision model scores of" ;
-    rdfs:comment "inverse - Links image to vision/classification scores and producing model." .
+    rdfs:label "has vision model scores" ;
+    owl:inverseOf ffonto:hasVisionModelScores .
 
-ffonto:isVisionScoresOf owl:inverseOf ffonto:hasVisionScores .
+ffonto:usedModel rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:VisionModelScores ;
+    rdfs:range ffonto:MLModel ;
+    rdfs:label "used model" .
 
 ffonto:hasSmokeLayers rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:SmokeObservation ;
@@ -7897,13 +7996,13 @@ ffonto:assignedLabel rdf:type owl:ObjectProperty ;
     rdfs:label "assigned label" ;
     rdfs:comment "Links a LabelAssignment to the Label assigned." ;
     rdfs:domain ffonto:LabelAssignment ;
-    rdfs:range ffonto:Label .
+    rdfs:range ffonto:PredictedLabel .
 
 ffonto:assignedLabelOf rdf:type owl:ObjectProperty ;
     rdfs:label "assigned label of" ;
     rdfs:comment "Inverse - Links a LabelAssignment to the Label assigned." ;
     rdfs:range ffonto:LabelAssignment ;
-    rdfs:domain ffonto:Label .
+    rdfs:domain ffonto:PredictedLabel .
 
 ffonto:assignedLabelOf owl:inverseOf ffonto:assignedLabel .
 
@@ -7920,19 +8019,24 @@ ffonto:labelSourceOfOf a owl:ObjectProperty ;
 
 ffonto:labelSourceOfOf owl:inverseOf ffonto:labelSourceOf .
 
-ffonto:imageHasLabelAssignment rdf:type owl:ObjectProperty ;
+ffonto:hasLabelAssignment rdf:type owl:ObjectProperty ;
     rdfs:label "image has label assignment" ;
-    rdfs:comment "Connects an ImageAsset to zero or more LabelAssignment instances." ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:comment "Connects an image observtaion to zero or more LabelAssignment instances." ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range ffonto:LabelAssignment .
 
-ffonto:imageHasLabelAssignmentOf rdf:type owl:ObjectProperty ;
+ffonto:isLabelAssignmentOf rdf:type owl:ObjectProperty ;
     rdfs:label "image has label assignment of" ;
-    rdfs:comment "Inverse - Connects an ImageAsset to zero or more LabelAssignment instances." ;
-    rdfs:range ffonto:ImageAsset ;
+    rdfs:comment "Inverse - hasLabelAssignment." ;
+    rdfs:range ffonto:ImageObservation ;
     rdfs:domain ffonto:LabelAssignment .
 
-ffonto:imageHasLabelAssignmentOf owl:inverseOf ffonto:imageHasLabelAssignment .
+ffonto:opacity rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:LabelAssignment ;
+    rdfs:range xsd:string ;
+    rdfs:label "opacity" .
+
+ffonto:isLabelAssignmentOf owl:inverseOf ffonto:hasLabelAssignment .
 
 ffonto:audioAttachedTo rdf:type owl:ObjectProperty ;
     rdfs:label "audio attached to" ;
@@ -7982,40 +8086,47 @@ ffonto:audioEventOf owl:inverseOf ffonto:audioEvent .
 ffonto:hasThresholdSet rdf:type owl:ObjectProperty ;
     rdfs:label "has threshold set" ;
     rdfs:comment "Associates predictions or model outputs with ThresholdSet instances." ;
-    rdfs:domain [
-        a owl:Class ;
-        owl:unionOf (ffonto:VisionModelScores ffonto:AudioRecord ffonto:ImageAsset)
-    ] ;
+    rdfs:domain ffonto:VisionModelScores ;
     rdfs:range ffonto:ThresholdSet .
 
 ffonto:isThresholdSetOf a owl:ObjectProperty ;
-    rdfs:range [
-        a owl:Class ;
-        owl:unionOf (ffonto:VisionModelScores ffonto:AudioRecord ffonto:ImageAsset)
-    ] ;
+    rdfs:range ffonto:VisionModelScores ;
     rdfs:domain ffonto:ThresholdSet ;
     rdfs:label "inverse of is threshold set"@en .
 
 ffonto:isThresholdSetOf owl:inverseOf ffonto:hasThresholdSet .
 
-ffonto:hasProvenance rdf:type owl:ObjectProperty ;
-    rdfs:label "has provenance" ;
-    rdfs:comment "Links a model output or dataset artifact to ModelProvenance." ;
-    rdfs:domain [
-        a owl:Class ;
-        owl:unionOf (ffonto:CaptionModelOutput ffonto:VisionModelScores ffonto:AudioRecord)
-    ] ;
-    rdfs:range ffonto:ModelProvenance .
+ffonto:fireThreshold rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ThresholdSet ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "fire threshold" .
 
-ffonto:isProvenanceOf a owl:ObjectProperty ;
-    rdfs:range [
-        a owl:Class ;
-        owl:unionOf (ffonto:CaptionModelOutput ffonto:VisionModelScores ffonto:AudioRecord)
-    ] ;
+ffonto:smokeThreshold rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ThresholdSet ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "smoke threshold" .
+
+ffonto:globalDetectionThreshold rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ThresholdSet ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "global detection threshold" .
+
+ffonto:frameThreshold rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ThresholdSet ;
+    rdfs:range xsd:integer ;
+    rdfs:label "frame threshold" .
+
+ffonto:hasModelProvenance rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:ModelOutput ;
+    rdfs:range ffonto:ModelProvenance ;
+    rdfs:label "has model provenance" .
+
+ffonto:isModelProvenanceOf rdf:type owl:ObjectProperty ;
+    rdfs:range ffonto:ModelOutput ;
     rdfs:domain ffonto:ModelProvenance ;
-    rdfs:label "inverse of is provenance"@en  .
+    rdfs:label "has model provenance" .
 
-ffonto:isProvenanceOf owl:inverseOf ffonto:hasProvenance .
+ffonto:hasModelProvenance owl:inverseOf ffonto:isModelProvenanceOf .
 
 ffonto:hasAudit rdf:type owl:ObjectProperty ;
     rdfs:label "has audit record" ;
@@ -8038,12 +8149,12 @@ ffonto:isAuditOf rdf:type owl:ObjectProperty ;
 ffonto:isAuditOf owl:inverseOf ffonto:hasAudit .
 
 ffonto:hasGridLocation rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:FireEvent ;
+    rdfs:domain ffonto:SpatialExtent ;
     rdfs:range ffonto:GridLocation ;
     rdfs:label "has grid location" .
 
 ffonto:isGridLocationOf a owl:ObjectProperty ;
-    rdfs:range ffonto:FireEvent ;
+    rdfs:range ffonto:SpatialExtent ;
     rdfs:domain ffonto:GridLocation ;
     rdfs:label "inverse of is grid location"@en  .
 
@@ -8167,7 +8278,8 @@ ffonto:hasSuppressionDifficulty rdf:type owl:ObjectProperty ;
 ffonto:isSuppressionDifficultyOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:FireEvent ;
     rdfs:domain ffonto:SuppressionDifficulty ;
-    rdfs:label "is suppression difficulty assessment of" .
+    rdfs:label "is suppression difficulty assessment of" ;
+    owl:inverseOf ffonto:hasSuppressionDifficulty .
 
 ffonto:reachedWUI rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FireEvent;
@@ -8177,7 +8289,8 @@ ffonto:reachedWUI rdf:type owl:ObjectProperty ;
 ffonto:reachedWUIOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:FireEvent;
     rdfs:domain ffonto:UrbanWildlandInterface ;
-    rdfs:label "reached urban-wildland interface" .
+    rdfs:label "reached urban-wildland interface" ;
+    owl:inverseOf ffonto:reachedWUI .
 
 ffonto:burningNearRiver rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FireEvent;
@@ -8583,11 +8696,25 @@ ffonto:containmentPercent rdf:type owl:DatatypeProperty ;
     rdfs:range xsd:decimal ;
     rdfs:label "containment percent" .
 
-ffonto:areaHa rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:PerimeterSnapshot ;
+ffonto:rainMm rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:WeatherObservation ;
     rdfs:range xsd:decimal ;
-    rdfs:label "area (ha)" ;
-    rdfs:comment "Perimeter-derived area in hectares." .
+    rdfs:label "rain mm" .
+
+ffonto:fireOccurred rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:WeatherObservation ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "fire occurred" .
+
+ffonto:areaHa rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:WeatherObservation ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "area ha" .
+
+ffonto:rowIndex rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:WeatherObservation ;
+    rdfs:range xsd:integer ;
+    rdfs:label "rowI index" .
 
 ffonto:areaAcres rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:PerimeterSnapshot ;
@@ -8619,29 +8746,21 @@ ffonto:spotFiresVisible rdf:type owl:DatatypeProperty ;
     rdfs:label "spot fires visible" ;
     rdfs:comment "Indicates visible spot fires ahead of main flame." .
 
-ffonto:smokeScore rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:SmokeObservation ;
+ffonto:fireScore rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:VisionModelScores ;
     rdfs:range xsd:decimal ;
-    rdfs:label "smoke score" ;
-    rdfs:comment "Numeric smoke detection score for the frame (0.0-1.0 scale)." .
+    rdfs:label "fire score" .
 
-ffonto:smokeThreshold rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:SmokeObservation ;
+ffonto:smokeScore rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:VisionModelScores ;
     rdfs:range xsd:decimal ;
-    rdfs:label "smoke detection threshold" ;
-    rdfs:comment "Threshold above which smoke is considered present." .
+    rdfs:label "smoke score" .
 
 ffonto:fireProbabilityScore rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:FireProbabilityModel ;
     rdfs:range xsd:decimal ;
     rdfs:label "fire probability" ;
     rdfs:comment "Model-provided fire probability score (0.0-1.0)." .
-
-ffonto:fireProbabilityThreshold rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:FireProbabilityModel ;
-    rdfs:range xsd:decimal ;
-    rdfs:label "fire probability threshold" ;
-    rdfs:comment "Threshold used to declare a fire detection by the model." .
 
 ffonto:smokeColorLiteral rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:SmokeObservation ;
@@ -8697,7 +8816,23 @@ ffonto:retardantVisible rdf:type owl:DatatypeProperty ;
     rdfs:label "retardant visible" ;
     rdfs:comment "Indicates whether foam or retardant staining is visible." .
 
-ffonto:airTemperatureC rdf:type owl:DatatypeProperty ;
+ffonto:weatherRow rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:WeatherObservation ;
+    rdfs:range xsd:string ;
+    rdfs:label "weather row raw" ;
+    rdfs:comment "Optional raw CSV row or JSON serialization for audit." .
+
+ffonto:hasRecordConfidence rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "record confidence" .
+
+ffonto:hasObservationSource rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "observation source" .
+
+ffonto:temperatureC rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:WeatherObservation ;
     rdfs:range xsd:decimal ;
     rdfs:label "air temperature (C)" ;
@@ -8740,37 +8875,37 @@ ffonto:directAttackFavored rdf:type owl:DatatypeProperty ;
     rdfs:comment "Indicates if current RH/conditions favor direct hand-tool attack." .
 
 ffonto:FFMC rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:FuelMoistureIndex ;
+    rdfs:domain ffonto:FireWeatherRecord ;
     rdfs:range xsd:decimal ;
     rdfs:label "FFMC" ;
     rdfs:comment "Fine Fuel Moisture Code." .
 
 ffonto:ISI rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:FuelMoistureIndex ;
+    rdfs:domain ffonto:FireWeatherRecord ;
     rdfs:range xsd:decimal ;
     rdfs:label "ISI" ;
     rdfs:comment "Initial Spread Index." .
 
 ffonto:DMC rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:FuelMoistureIndex ;
+    rdfs:domain ffonto:FireWeatherRecord ;
     rdfs:range xsd:decimal ;
     rdfs:label "DMC" ;
     rdfs:comment "Duff Moisture Code." .
 
 ffonto:DC rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:FuelMoistureIndex ;
+    rdfs:domain ffonto:FireWeatherRecord ;
     rdfs:range xsd:decimal ;
     rdfs:label "DC" ;
     rdfs:comment "Drought Code." .
 
 ffonto:BUI rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:FuelMoistureIndex ;
+    rdfs:domain ffonto:FireWeatherRecord ;
     rdfs:range xsd:decimal ;
     rdfs:label "BUI" ;
     rdfs:comment "Buildup Index." .
 
 ffonto:FWI rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:FuelMoistureIndex ;
+    rdfs:domain ffonto:FireWeatherRecord ;
     rdfs:range xsd:decimal ;
     rdfs:label "FWI" ;
     rdfs:comment "Fire Weather Index." .
@@ -8816,6 +8951,18 @@ ffonto:cloudCoverPresent rdf:type owl:DatatypeProperty ;
     rdfs:range xsd:boolean ;
     rdfs:label "cloud cover present" ;
     rdfs:comment "Indicates whether cloud cover was present." .
+
+ffonto:cloudCover rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ImageObservation ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "cloud cover" ;
+    rdfs:comment "Indicates image cloud cover." .
+
+ffonto:blur rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ImageObservation ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "blur" ;
+    rdfs:comment "Indicates image blur." .
 
 ffonto:sunVisible rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:SmokeObservation ;
@@ -8944,88 +9091,139 @@ ffonto:streamsRunningLow rdf:type owl:DatatypeProperty ;
     rdfs:comment "Boolean indicating likely low streamflow conditions nearby." .
 
 ffonto:imageId rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:string ;
     rdfs:label "image id" ;
     rdfs:comment "Unique image identifier (as provided)." .
 
+ffonto:imageWidthPx rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ImageObservation ;
+    rdfs:range xsd:integer ;
+    rdfs:label "image width px" .
+
+ffonto:imageHeightPx rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ImageObservation ;
+    rdfs:range xsd:integer ;
+    rdfs:label "image height px" .
+
 ffonto:imageResolutionWidth rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:integer ;
     rdfs:label "image width (px)" ;
+    owl:deprecated true ;
     rdfs:comment "Image width in pixels." .
 
 ffonto:imageResolutionHeight rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:integer ;
     rdfs:label "image height (px)" ;
+    owl:deprecated true ;
     rdfs:comment "Image height in pixels." .
 
 ffonto:imageAspectRatio rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:decimal ;
     rdfs:label "image aspect ratio (w:h)" ;
     rdfs:comment "Numerical aspect ratio width/height." .
 
 ffonto:imageGeorefPresent rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:boolean ;
     rdfs:label "is image georeferenced (non-null)?" ;
     rdfs:comment "Indicates whether georef coordinates are present (true) or null/missing (false)." .
 
 ffonto:imageSpatialFootprintStored rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:boolean ;
     rdfs:label "spatial footprint polygon stored" ;
     rdfs:comment "Whether a spatial footprint polygon is stored for the image." .
 
+ffonto:imageSourceLiteral rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ImageObservation ;
+    rdfs:range xsd:string ;
+    rdfs:label "image source literal" .
+
+ffonto:imageQualityCloudCover rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ImageObservation ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "image cloud cover" .
+
+ffonto:imageQualityBlur rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ImageObservation ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "image blur" .
+
 ffonto:imageChecksumSHA256 rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:string ;
     rdfs:label "image file checksum (SHA-256)" ;
     rdfs:comment "SHA-256 checksum string for the image file." .
 
 ffonto:imageLocalPath rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:string ;
     rdfs:label "local uri / path" ;
     rdfs:comment "Local filesystem path to image." .
 
-ffonto:imageSourceLiteral rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+ffonto:mediaURI rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
     rdfs:range xsd:string ;
-    rdfs:label "image source (recorded)" ;
-    rdfs:comment "Recorded image source (camera id or 'unknown_camera')." .
+    rdfs:label "media uri" ;
+    rdfs:comment "" .
+
+ffonto:sourceLiteral rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "source literal" .
+
+ffonto:licenseText rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "license text" .
 
 ffonto:imageLicense rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:string ;
     rdfs:label "image license" ;
     rdfs:comment "License string for the image (e.g., CC-BY-4.0)." .
 
 ffonto:imageBandsRecorded rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:boolean ;
     rdfs:label "image bands recorded?" ;
     rdfs:comment "Whether image bands (RGB/IR) metadata are recorded." .
 
+ffonto:bandsLiteral rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ImageObservation ;
+    rdfs:range xsd:string ;
+    rdfs:label "bands literal" ;
+    rdfs:comment "Band list such as RGB, NIR, or JSON array string." .
+
 ffonto:captureTimeUTC_present rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:boolean ;
     rdfs:label "capture_time_utc present?" ;
     rdfs:comment "Whether capture_time_utc is present for the image." .
 
-ffonto:cameraDeviceIDKnown rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
-    rdfs:range xsd:boolean ;
-    rdfs:label "camera/device ID known?" ;
-    rdfs:comment "Whether camera or device ID is recorded." .
+ffonto:deviceID rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "device id" .
 
-ffonto:imageSiteOrCountryRecorded rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:ImageAsset ;
-    rdfs:range xsd:boolean ;
-    rdfs:label "site or country recorded?" ;
-    rdfs:comment "Whether site or country fields are populated." .
+ffonto:siteLiteral rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "site literal" .
+
+ffonto:regionLiteral rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "region literal" .
+
+ffonto:countryLiteral rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "country literal" .
 
 ffonto:sensorPoseRecorded rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:ImageQualityMetadata ;
@@ -9046,22 +9244,18 @@ ffonto:blurQualityPresent rdf:type owl:DatatypeProperty ;
     rdfs:comment "Whether blur quality metadata is present." .
 
 ffonto:captionText rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:CaptionModelOutput ;
+    rdfs:domain ffonto:ImageObservation ;
     rdfs:range xsd:string ;
     rdfs:label "caption text" ;
     rdfs:comment "Caption text output by the caption model." .
 
-ffonto:captionModelName rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:CaptionModelOutput ;
-    rdfs:range xsd:string ;
-    rdfs:label "caption model name" ;
-    rdfs:comment "Model name that produced the caption." .
+ffonto:modelName rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:MLModel ;
+    rdfs:range xsd:string .
 
-ffonto:visionModelName rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:VisionModelScores ;
-    rdfs:range xsd:string ;
-    rdfs:label "vision model name/version" ;
-    rdfs:comment "Vision model identifier and version producing classification scores." .
+ffonto:modelVersion rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:MLModel ;
+    rdfs:range xsd:string .
 
 ffonto:scoreSmoke rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:VisionModelScores ;
@@ -9081,18 +9275,6 @@ ffonto:scoreNoFire rdf:type owl:DatatypeProperty ;
     rdfs:label "no-fire score" ;
     rdfs:comment "No-fire score from vision model (0-1)." .
 
-ffonto:configuredFireThreshold rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:VisionModelScores ;
-    rdfs:range xsd:decimal ;
-    rdfs:label "configured fire threshold" ;
-    rdfs:comment "Configured threshold for declaring fire in system." .
-
-ffonto:configuredSmokeThreshold rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:VisionModelScores ;
-    rdfs:range xsd:decimal ;
-    rdfs:label "configured smoke threshold" ;
-    rdfs:comment "Configured threshold for declaring smoke in system." .
-
 ffonto:captionImpliesDaytime rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:CaptionModelOutput ;
     rdfs:range xsd:boolean ;
@@ -9105,29 +9287,46 @@ ffonto:captionImpliesWindy rdf:type owl:DatatypeProperty ;
     rdfs:label "caption implies windy conditions?" ;
     rdfs:comment "True if caption wording (e.g., 'billowing') implies windy/turbulent conditions." .
 
+ffonto:zshotModel rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ProvenanceRecord ;
+    rdfs:range xsd:string .
+
 ffonto:labelText rdf:type owl:DatatypeProperty ;
     rdfs:label "label text" ;
     rdfs:comment "Text of the label (e.g., 'high', 'smoke', 'fire')." ;
-    rdfs:domain ffonto:Label ;
+    rdfs:domain ffonto:PredictedLabel ;
     rdfs:range xsd:string .
 
-ffonto:labelSource_literal rdf:type owl:DatatypeProperty ;
-    rdfs:label "label source literal" ;
-    rdfs:comment "Literal source indicator (caption, detector, human)." ;
+ffonto:labelType rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:LabelAssignment ;
-    rdfs:range xsd:string .
+    rdfs:range xsd:string ;
+    rdfs:label "label type" .
+
+ffonto:rawLabel rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:LabelAssignment ;
+    rdfs:range xsd:string ;
+    rdfs:label "raw label" .
+
+ffonto:labelSeverity rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:LabelAssignment ;
+    rdfs:range xsd:string ;
+    rdfs:label "label severity" .
+
+ffonto:labelConfidence rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:LabelAssignment ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "label confidence" .
+
+ffonto:labelSourceLiteral rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:LabelAssignment ;
+    rdfs:range xsd:string ;
+    rdfs:label "label source literal" .
 
 ffonto:labelCount rdf:type owl:DatatypeProperty ;
     rdfs:label "label count" ;
     rdfs:comment "Number of labels attached to an image record." ;
     rdfs:domain ffonto:ImageAsset ;
     rdfs:range xsd:integer .
-
-ffonto:severityAssigned rdf:type owl:DatatypeProperty ;
-    rdfs:label "assigned severity" ;
-    rdfs:comment "Severity label assigned to the image (e.g., low/medium/high)." ;
-    rdfs:domain ffonto:LabelAssignment ;
-    rdfs:range xsd:string .
 
 ffonto:decisionHumanValidated rdf:type owl:DatatypeProperty ;
     rdfs:label "decision human validated?" ;
@@ -9138,49 +9337,80 @@ ffonto:decisionHumanValidated rdf:type owl:DatatypeProperty ;
 ffonto:audioFilePath rdf:type owl:DatatypeProperty ;
     rdfs:label "audio file path" ;
     rdfs:comment "Local filesystem path or URI for the audio file." ;
-    rdfs:domain ffonto:AudioRecord ;
+    rdfs:domain ffonto:AudioObservation ;
     rdfs:range xsd:string .
 
-ffonto:audioRecordUuid rdf:type owl:DatatypeProperty ;
-    rdfs:label "audio record UUID" ;
-    rdfs:comment "Unique identifier for the audio record." ;
-    rdfs:domain ffonto:AudioRecord ;
-    rdfs:range xsd:string .
+ffonto:provenanceURI rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ProvenanceRecord ;
+    rdfs:range xsd:string ;
+    rdfs:label "provenance uri" .
 
-ffonto:audioModality rdf:type owl:DatatypeProperty ;
-    rdfs:label "audio modality/source" ;
-    rdfs:comment "Source label for the audio capture (e.g., unknown_microphone)." ;
-    rdfs:domain ffonto:AudioRecord ;
-    rdfs:range xsd:string .
+ffonto:provenanceChecksumSHA256 rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ProvenanceRecord ;
+    rdfs:range xsd:string ;
+    rdfs:label "provenance checksum sha256" .
 
-ffonto:audioCaptureTimePresent rdf:type owl:DatatypeProperty ;
-    rdfs:label "audio capture_time_utc present?" ;
-    rdfs:comment "Indicates whether capture_time_utc is present for the audio." ;
-    rdfs:domain ffonto:AudioRecord ;
-    rdfs:range xsd:boolean .
+ffonto:recordUUID rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "record UUID" ;
+    rdfs:comment "Unique identifier of the stored record." .
 
-ffonto:audioDeviceRecorded rdf:type owl:DatatypeProperty ;
-    rdfs:label "audio device recorded?" ;
-    rdfs:comment "Whether the capture device ID / sensor location is recorded for audio." ;
-    rdfs:domain ffonto:AudioRecord ;
-    rdfs:range xsd:boolean .
 
-ffonto:audioEventTopkLabel rdf:type owl:DatatypeProperty ;
-    rdfs:label "audio top-k frame label" ;
-    rdfs:comment "Top-k frame label(s) detected in the audio (e.g., 'explosion')." ;
-    rdfs:domain ffonto:AudioRecord ;
-    rdfs:range xsd:string .
+ffonto:schemaVersion rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "schema version" .
 
-ffonto:audioFrameStride_s rdf:type owl:DatatypeProperty ;
+ffonto:modality rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "modality" ;
+    rdfs:comment "Record modality such as Image, Audio, or tabular/weather." .
+
+ffonto:eventId rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "event id" ;
+    rdfs:comment "Event identifier from the source record; may be missing." .
+
+ffonto:captureTimeUTC rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "capture time UTC" .
+
+ffonto:captureTimeUTC_present rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "capture time UTC present" .
+
+
+ffonto:audioTopK rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:AudioObservation ;
+    rdfs:range xsd:string ;
+    rdfs:label "audio top-k labels" ;
+    rdfs:comment "Top-k labels as a string or JSON array string." .
+
+ffonto:audioModel rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:AudioObservation ;
+    rdfs:range xsd:string ;
+    rdfs:label "audio model" .
+
+ffonto:classMapSHA1 rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:AudioObservation ;
+    rdfs:range xsd:string ;
+    rdfs:label "class map sha1" .
+
+ffonto:audioFrameStrideS rdf:type owl:DatatypeProperty ;
     rdfs:label "audio model frame stride (s)" ;
     rdfs:comment "Temporal stride used by the audio model in seconds." ;
-    rdfs:domain ffonto:AudioRecord ;
+    rdfs:domain ffonto:AudioObservation ;
     rdfs:range xsd:decimal .
 
 ffonto:audioEventCountLabels rdf:type owl:DatatypeProperty ;
     rdfs:label "distinct audio event labels count" ;
     rdfs:comment "Number of distinct event labels present in the audio clip." ;
-    rdfs:domain ffonto:AudioRecord ;
+    rdfs:domain ffonto:AudioObservation ;
     rdfs:range xsd:integer .
 
 ffonto:captionSuggestsDenseSmoke rdf:type owl:DatatypeProperty ;
@@ -9201,6 +9431,11 @@ ffonto:fireScoreAboveThreshold rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:VisionModelScores ;
     rdfs:range xsd:boolean .
 
+ffonto:smokeScoreAboveThreshold rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:VisionModelScores ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "smoke score above threshold" .
+
 ffonto:modelVersionsRecorded rdf:type owl:DatatypeProperty ;
     rdfs:label "model versions recorded?" ;
     rdfs:comment "Whether model versions are recorded for audit." ;
@@ -9212,24 +9447,6 @@ ffonto:modelRepoUrl rdf:type owl:DatatypeProperty ;
     rdfs:comment "URL to model repository or TF-Hub page used for provenance." ;
     rdfs:domain ffonto:ModelProvenance ;
     rdfs:range xsd:string .
-
-ffonto:classThresholdsStored rdf:type owl:DatatypeProperty ;
-    rdfs:label "class thresholds stored?" ;
-    rdfs:comment "Whether class thresholds (fire/smoke/frame_thresh) are stored alongside predictions." ;
-    rdfs:domain ffonto:ThresholdSet ;
-    rdfs:range xsd:boolean .
-
-ffonto:globalDetectionThreshold rdf:type owl:DatatypeProperty ;
-    rdfs:label "global detection threshold (thresh)" ;
-    rdfs:comment "System-wide detection threshold (numeric)." ;
-    rdfs:domain ffonto:ThresholdSet ;
-    rdfs:range xsd:decimal .
-
-ffonto:frameThresh rdf:type owl:DatatypeProperty ;
-    rdfs:label "frame threshold (frame_thresh)" ;
-    rdfs:comment "Frame-level threshold used for alerts." ;
-    rdfs:domain ffonto:ThresholdSet ;
-    rdfs:range xsd:decimal .
 
 ffonto:classMapChecksum rdf:type owl:DatatypeProperty ;
     rdfs:label "class-map checksum" ;
@@ -9243,39 +9460,61 @@ ffonto:checksumsRecorded rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:AuditRecord ;
     rdfs:range xsd:boolean .
 
-ffonto:weatherSiteRegionCountry rdf:type owl:DatatypeProperty ;
-    rdfs:label "weather record site/region/country" ;
-    rdfs:comment "Site/region/country for the weather row." ;
-    rdfs:domain ffonto:WeatherObservation ;
+ffonto:hasTemporalExtent rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range ffonto:TemporalExtent .
+
+ffonto:TemporalExtent rdf:type owl:Class .
+
+ffonto:hasDateTime rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:TemporalExtent ;
+    rdfs:range xsd:dateTime .
+
+ffonto:hasDate rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:TemporalExtent ;
+    rdfs:range xsd:date .
+
+ffonto:hasYear rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:TemporalExtent ;
+    rdfs:range xsd:gYear .
+
+ffonto:hasMonth rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:TemporalExtent ;
+    rdfs:range xsd:gMonth .
+
+ffonto:hasDay rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:TemporalExtent ;
+    rdfs:range xsd:gDay .
+
+ffonto:hasDayName rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:TemporalExtent ;
     rdfs:range xsd:string .
 
-ffonto:weatherRowDate rdf:type owl:DatatypeProperty ;
-    rdfs:label "weather row date (dd/mm/yyyy)" ;
-    rdfs:comment "Date (day/month/year) of the weather row." ;
-    rdfs:domain ffonto:WeatherObservation ;
+ffonto:hasSpatialExtent rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range ffonto:SpatialExtent .
+
+ffonto:SpatialExtent rdf:type owl:Class .
+
+ffonto:hasCountry rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:SpatialExtent ;
     rdfs:range xsd:string .
 
-ffonto:weatherRowAreaHaPresent rdf:type owl:DatatypeProperty ;
-    rdfs:label "area_ha present in weather row?" ;
-    rdfs:comment "Indicates if area_ha is recorded in the weather row." ;
-    rdfs:domain ffonto:WeatherObservation ;
-    rdfs:range xsd:boolean .
+ffonto:hasRegion rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:SpatialExtent ;
+    rdfs:range xsd:string .
 
-ffonto:timestampPresent rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:TemporalRecord ;
-    rdfs:range xsd:boolean ;
-    rdfs:label "timestamp present" ;
-    rdfs:comment "Indicates whether timestamps exist for pairing records." .
+ffonto:hasSite rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:SpatialExtent ;
+    rdfs:range xsd:string .
 
 ffonto:gridX rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:GridLocation ;
-    rdfs:range xsd:integer ;
-    rdfs:label "grid X coordinate" .
+    rdfs:range xsd:integer .
 
 ffonto:gridY rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:GridLocation ;
-    rdfs:range xsd:integer ;
-    rdfs:label "grid Y coordinate" .
+    rdfs:range xsd:integer .
 
 ffonto:elevatedFireDanger rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:FireDangerAssessment ;
@@ -9311,6 +9550,11 @@ ffonto:audioClipCount rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:FireEvent ;
     rdfs:range xsd:integer ;
     rdfs:label "number of audio clips" .
+
+ffonto:audioThreshold rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:AudioObservation ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "audio threshold" .
 
 ffonto:crownFireVisible rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:FireSpread ;
@@ -10023,7 +10267,6 @@ ffonto:LightningStrike rdf:type owl:Class ;
     rdfs:label "Lightning Strike" ;
      rdfs:comment "A single occurrence of lightning contacting the ground or an object."@en .
 
-
 ffonto:VolcanicActivity rdf:type owl:Class ;
     rdfs:subClassOf ffonto:NaturalCause ;
     rdfs:subClassOf ffonto:NaturalIgnition ;
@@ -10545,7 +10788,7 @@ ffonto:predictsSmokePlume rdf:type owl:ObjectProperty ;
 
 ffonto:predictsSmokePlumeOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:SmokeDispersionModel ;
-    rdfs:domaiin ffonto:SmokePlume .
+    rdfs:domain ffonto:SmokePlume .
 
 ffonto:predictsSmokePlumeOf owl:inverseOf ffonto:predictsSmokePlume .
 
@@ -10830,15 +11073,37 @@ ffonto:EnsembleForecast rdf:type owl:Class ;
 ffonto:ProvenanceRecord rdf:type owl:Class ;
     rdfs:label "Provenance Record" .
 
-ffonto:hasProvenanceRecord rdf:type owl:ObjectProperty ;
+ffonto:hasEventProvenanceRecord rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:ProvenanceRecord ;
     rdfs:range ffonto:FireEvent .
 
-ffonto:isProvenanceRecordOf rdf:type owl:ObjectProperty ;
+ffonto:isEventProvenanceRecordOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:ProvenanceRecord ;
     rdfs:domain ffonto:FireEvent .
 
-ffonto:isProvenanceRecordOf owl:inverseOf ffonto:hasProvenanceRecord .
+ffonto:isEventProvenanceRecordOf owl:inverseOf ffonto:hasEventProvenanceRecord .
+
+ffonto:hasProvenanceRecord rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range ffonto:ProvenanceRecord ;
+    rdfs:label "has provenance record" .
+
+ffonto:isProvenanceRecordOf rdf:type owl:ObjectProperty ;
+    rdfs:range ffonto:Observation ;
+    rdfs:domain ffonto:ProvenanceRecord ;
+    rdfs:label "inverse - has provenance record" ;
+    owl:inverseOf ffonto:hasProvenanceRecord .
+
+ffonto:hasModel rdf:type owl:ObjectProperty ;
+    rdfs:domain ffonto:ProvenanceRecord ;
+    rdfs:range ffonto:MLModel ;
+    rdfs:label "has model" .
+
+ffonto:isModelOf rdf:type owl:ObjectProperty ;
+    rdfs:range ffonto:ProvenanceRecord ;
+    rdfs:model ffonto:MLModel ;
+    rdfs:label "is model of" ;
+    owl:inverseOf ffonto:hasModel .
 
 ffonto:ModelOutput rdf:type owl:Class ;
     rdfs:label "Model Output" .
@@ -11256,7 +11521,8 @@ ffonto:hasICSFunction rdf:type owl:ObjectProperty ;
 ffonto:isICSFunctionOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:IncidentCommandSystem ;
     rdfs:domain ffonto:ICSFunction ;
-    rdfs:label "has ICS function" .
+    rdfs:label "has ICS function" ;
+    owl:inverseOf ffonto:hasICSFunction .
 
 ffonto:hasRole rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:ICSFunction ;
@@ -11444,7 +11710,8 @@ ffonto:isSymptomOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:SmokeHealthEffect ;
     rdfs:domain ffonto:HealthSymptom ;
     rdfs:comment "Associates an entity (person or animal) with an observed symptom or sign."@en ;
-    rdfs:label "has symptom" .
+    rdfs:label "has symptom" ;
+    owl:inverseOf ffonto:hasSymptom .
 
 ffonto:evacuationAction rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:SurvivalGuidance ;
@@ -11469,7 +11736,8 @@ ffonto:utilityImplementsPSPSOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:UtilityPowerShutoff ;
     rdfs:domain owl:Thing ;
     rdfs:label "utility implements PSPS Of" ;
-    rdfs:comment "References utility organizations that implement planned shutoffs." .
+    rdfs:comment "References utility organizations that implement planned shutoffs." ;
+    owl:inverseOf ffonto:utilityImplementsPSPS .
 
 ffonto:hasSuppressionLimit rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:FireSuppressionAction ;
@@ -11527,17 +11795,25 @@ ffonto:implementsPSPSOf rdf:type owl:ObjectProperty ;
 
 ffonto:implementsPSPSOf owl:inverseOf ffonto:implementsPSPS .
 
-ffonto:usesModel rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:ForestFire ;
-    rdfs:range ffonto:ForestFirePredictionModel ;
-    rdfs:label "uses predictive model" .
+ffonto:producedBy a owl:ObjectProperty ;
+    rdfs:domain ffonto:ModelOutput ;
+    rdfs:range ffonto:ModelExecution ;
+    rdfs:label "produced by" .
 
-ffonto:usesModelOf a owl:ObjectProperty ;
-    rdfs:range ffonto:ForestFire ;
-    rdfs:domain ffonto:ForestFirePredictionModel ;
-    rdfs:label "inverse of uses model"@en .
+ffonto:usesModel a owl:ObjectProperty ;
+    rdfs:domain ffonto:ModelExecution ;
+    rdfs:range ffonto:MLModel ;
+    rdfs:label "use model" .
 
-ffonto:usesModelOf owl:inverseOf ffonto:usesModel .
+ffonto:produces a owl:ObjectProperty ;
+    rdfs:domain ffonto:ModelExecution ;
+    rdfs:range ffonto:ModelOutput ;
+    owl:inverseOf ffonto:producedBy .
+
+ffonto:isUsedBy a owl:ObjectProperty ;
+    rdfs:domain ffonto:MLModel ;
+    rdfs:range ffonto:ModelExecution ;
+    owl:inverseOf ffonto:usesModel .
 
 ffonto:performsTask rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:MachineLearningModel ;
@@ -11648,7 +11924,7 @@ ffonto:environmentalAffectedOf rdf:type owl:ObjectProperty ;
     rdfs:label "environmentally affected of" ;
     rdfs:comment "Inverse - Indicates environmental factors influencing wildfire behavior." ;
     rdfs:range ffonto:ForestFire;
-    rdfs:domaiin ffonto:EnvironmentalFactor .
+    rdfs:domain ffonto:EnvironmentalFactor .
 
 ffonto:environmentalAffectedOf owl:inverseOf ffonto:environmentalAffectedBy .
 
@@ -11918,6 +12194,20 @@ ffonto:generatedByModelOf a owl:ObjectProperty ;
 
 ffonto:generatedByModelOf owl:inverseOf ffonto:generatedByModel .
 
+ffonto:generatedBy a owl:ObjectProperty ;
+    rdfs:domain ffonto:Annotation ;
+    rdfs:range ffonto:MLModel ;
+    rdfs:label "generated by" ;
+    rdfs:comment "Indicates which model generated the annotation." .
+
+ffonto:generated a owl:ObjectProperty ;
+    rdfs:range ffonto:Annotation ;
+    rdfs:domain ffonto:MLModel ;
+    rdfs:label "generated" ;
+    rdfs:comment "Inverse of generated by." .
+
+ffonto:generatedBy owl:inverseOf ffonto:generated .
+
 ffonto:derivedFromData rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:ModelOutput ;
     rdfs:range ffonto:DatasetVersion ;
@@ -11940,17 +12230,45 @@ ffonto:hasConfidence rdf:type owl:DatatypeProperty ;
     rdfs:range xsd:decimal ;
     rdfs:label "confidence value" .
 
-ffonto:resolution rdf:type owl:DatatypeProperty ;
-    rdfs:label "spatial resolution" ;
-    rdfs:comment "Spatial resolution of wildfire index or dataset." ;
-    rdfs:domain ffonto:FireWeatherIndex ;
-    rdfs:range xsd:string .
+ffonto:centerLiteral rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "center literal" ;
+    rdfs:comment "Center point as WKT or JSON string." .
+
+ffonto:footprintLiteral rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "footprint literal" ;
+    rdfs:comment "Footprint geometry as WKT or JSON string." .
+
+ffonto:crsLiteral rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "CRS literal" .
+
+ffonto:resolutionM rdf:type owl:DatatypeProperty ;
+    rdfs:domain ffonto:ImageObservation ;
+    rdfs:range xsd:decimal ;
+    rdfs:label "resolution in meters" .
 
 ffonto:dataSource rdf:type owl:DatatypeProperty ;
     rdfs:label "data source" ;
     rdfs:comment "Meteorological variables used in wildfire risk calculation." ;
     rdfs:domain ffonto:FireWeatherIndex ;
     rdfs:range xsd:string .
+
+ffonto:text a owl:DatatypeProperty ;
+    rdfs:domain ffonto:TextAnnotation ;
+    rdfs:range xsd:string ;
+    rdfs:label "text" ;
+    rdfs:comment "The textual content of the annotation." .
+
+ffonto:annotationSource a owl:DatatypeProperty ;
+    rdfs:domain ffonto:Annotation ;
+    rdfs:range xsd:string ;
+    rdfs:label "annotation source" ;
+    rdfs:comment "The source of the annotation." .
 
 #################################################################
 # Individuals
@@ -12252,7 +12570,7 @@ ffonto:affectsHealth rdf:type owl:ObjectProperty ;
 
 ffonto:affectsHealthOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:AirPollutantProperty ;
-    rdfs:population ffonto:RespiratoryIssue .
+    rdfs:domain ffonto:RespiratoryIssue .
 
 ffonto:affectsHealthOf owl:inverseOf ffonto:affectsHealth .
 
@@ -12755,23 +13073,23 @@ ffonto:InsuranceReview rdf:type ffonto:ContinuityStrategy ;
 ffonto:EmergencyCommunicationPlan rdf:type ffonto:ContinuityStrategy ;
     rdfs:label "Emergency Communication Plan" .
 
-ffonto:MeteorologicalVariable rdf:type owl:Class ;
+ffonto:MeteorologicalObservation rdf:type owl:Class ;
     rdfs:label "Meteorological Variable" ;
     rdfs:comment "Weather variables used in fire danger and climate analysis." .
 
-ffonto:Temperature rdf:type ffonto:MeteorologicalVariable ;
+ffonto:Temperature rdf:type ffonto:MeteorologicalObservation ;
     rdfs:label "Air Temperature" .
 
-ffonto:RelativeHumidity rdf:type ffonto:MeteorologicalVariable ;
+ffonto:RelativeHumidity rdf:type ffonto:MeteorologicalObservation ;
     rdfs:label "Relative Humidity" .
 
-ffonto:WindSpeed rdf:type ffonto:MeteorologicalVariable ;
+ffonto:WindSpeed rdf:type ffonto:MeteorologicalObservation ;
     rdfs:label "Wind Speed" .
 
-ffonto:Precipitation rdf:type ffonto:MeteorologicalVariable ;
+ffonto:Precipitation rdf:type ffonto:MeteorologicalObservation ;
     rdfs:label "Precipitation" .
 
-ffonto:SnowDepth rdf:type ffonto:MeteorologicalVariable ;
+ffonto:SnowDepth rdf:type ffonto:MeteorologicalObservation ;
     rdfs:label "Snow Depth" .
 
 ffonto:DataRepository rdf:type owl:Class ;
@@ -12889,7 +13207,8 @@ ffonto:influencedByWeatherOf rdf:type owl:ObjectProperty ;
     rdfs:label "influenced by weather" ;
     rdfs:comment "Indicates wildfire risk influenced by weather variability." ;
     rdfs:range ffonto:ForestFireRisk ;
-    rdfs:domain ffonto:WeatherCondition .
+    rdfs:domain ffonto:WeatherCondition ;
+    owl:inverseOf ffonto:influencedByWeather .
 
 ffonto:monitoredUsing rdf:type owl:ObjectProperty ;
     rdfs:label "monitored using" ;
@@ -13036,18 +13355,6 @@ ffonto:hasPart rdf:type owl:ObjectProperty ;
     rdfs:comment "Indicates that a spatial entity contains another spatial entity as part." ;
     rdfs:domain ffonto:SpatialEntity ;
     rdfs:range ffonto:SpatialEntity .
-
-ffonto:nearby rdf:type owl:ObjectProperty ;
-    rdfs:label "nearby" ;
-    rdfs:comment "Indicates that two spatial entities are located near each other." ;
-    rdfs:domain ffonto:SpatialEntity ;
-    rdfs:range ffonto:SpatialEntity .
-
-ffonto:nearbyOf rdf:type owl:ObjectProperty ;
-    rdfs:label "nearby" ;
-    rdfs:comment "Indicates that two spatial entities are located near each other." ;
-    rdfs:range ffonto:SpatialEntity ;
-    rdfs:domain ffonto:SpatialEntity .
 
 ffonto:hasLatitude rdf:type owl:DatatypeProperty ;
     rdfs:label "latitude" ;
@@ -13957,11 +14264,11 @@ ffonto:AccessConstraint rdf:type owl:Class ;
 
 ffonto:observesProperty rdf:type owl:ObjectProperty ;
     rdfs:domain sosa:Sensor ;
-    rdfs:range ffonto:MeteorologicalVariable ;
+    rdfs:range ffonto:MeteorologicalObservation ;
     owl:inverseOf ffonto:isObservedBySensor .
 
 ffonto:isObservedBySensor rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:MeteorologicalVariable ;
+    rdfs:domain ffonto:MeteorologicalObservation ;
     rdfs:range sosa:Sensor .
 
 ffonto:SuppressionTactic rdf:type owl:Class ;
@@ -14144,12 +14451,6 @@ ffonto:healthAffectedByPM25 rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:ParticulateMatterPM25 .
 
 ffonto:WildlifeImpact rdfs:subClassOf ffonto:EnvironmentalImpact .
-
-# Fire affects wildlife
-ffonto:fireEventAffectsWildlife rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:FireEvent ;
-    rdfs:range ffonto:Wildlife ;
-    rdfs:label "fire affects wildlife" .
 
 
 # Impact affects wildlife
@@ -14336,11 +14637,11 @@ ffonto:hasFinanceAdministrationSection
 
 ffonto:FlameLength rdfs:subClassOf ffonto:FireBehaviorMetric .
 
-ffonto:describesFlame
-    rdfs:domain ffonto:FlameLength ;
-    rdfs:range ffonto:FireFront .
+ffonto:AirCleaner rdfs:subClassOf ffonto:AirQualityMitigationDevice .
 
-    ffonto:AirCleaner rdfs:subClassOf ffonto:AirQualityMitigationDevice .
+ffonto:usesAirCleaner
+    rdfs:range ffonto:AirCleaner ;
+    rdfs:domain ffonto:IndoorAirQualityStrategy .
 
 ffonto:improvesAirQuality
     rdfs:domain ffonto:AirCleaner ;
@@ -14349,12 +14650,20 @@ ffonto:improvesAirQuality
 
 ffonto:FireRegime rdfs:subClassOf ffonto:ClimatePattern .
 
+ffonto:hasFireRegime
+    rdfs:range ffonto:FireRegime ;
+    rdfs:domain geo:SpatialObject .
+
 ffonto:characterizesRegion
     rdfs:domain ffonto:FireRegime ;
     rdfs:range geo:SpatialObject ;
     owl:inverseOf ffonto:hasFireRegime .
 
 ffonto:SituationReport rdfs:subClassOf ffonto:IncidentReport .
+
+ffonto:isReportedIn
+    rdfs:range ffonto:SituationReport ;
+    rdfs:domain ffonto:WildfireIncident .
 
 ffonto:reportsIncidentStatus
     rdfs:domain ffonto:SituationReport ;
@@ -14363,12 +14672,20 @@ ffonto:reportsIncidentStatus
 
 ffonto:FireLine rdfs:subClassOf geo:SpatialObject .
 
+ffonto:isContainedByFireLine
+    rdfs:range ffonto:FireLine ;
+    rdfs:domain ffonto:FireFront .
+
 ffonto:constructedForFire
     rdfs:domain ffonto:FireLine ;
     rdfs:range ffonto:FireFront ;
     owl:inverseOf ffonto:isContainedByFireLine .
 
 ffonto:AirAttackSupervisor rdfs:subClassOf ffonto:IncidentCommandRole .
+
+ffonto:isSupervisedByAirAttack
+    rdfs:range ffonto:AirAttackSupervisor ;
+    rdfs:domain ffonto:UAV .
 
 ffonto:supervisesAircraft
     rdfs:domain ffonto:AirAttackSupervisor ;
@@ -14377,12 +14694,21 @@ ffonto:supervisesAircraft
 
 ffonto:ConfidenceScore rdfs:subClassOf ffonto:PredictionMetric .
 
+ffonto:hasConfidenceScore
+    rdfs:range ffonto:ConfidenceScore ;
+    rdfs:domain ffonto:FireBehaviorModel .
+
+
 ffonto:evaluatesPrediction
     rdfs:domain ffonto:ConfidenceScore ;
     rdfs:range ffonto:FireBehaviorModel ;
     owl:inverseOf ffonto:hasConfidenceScore .
 
 ffonto:Trend rdfs:subClassOf ffonto:TimeSeriesAnalysis .
+
+ffonto:hasTrend
+    rdfs:range ffonto:Trend ;
+    rdfs:domain ffonto:FireRadiativePower .
 
 ffonto:describesTrendOf
     rdfs:domain ffonto:Trend ;
@@ -14391,12 +14717,20 @@ ffonto:describesTrendOf
 
 ffonto:FireEngine rdfs:subClassOf ffonto:FirefightingResource .
 
+ffonto:hasFireEngine
+    rdfs:range ffonto:FireEngine ;
+    rdfs:domain ffonto:WildfireIncident .
+
 ffonto:respondsToIncident
     rdfs:domain ffonto:FireEngine ;
     rdfs:range ffonto:WildfireIncident ;
     owl:inverseOf ffonto:hasFireEngine .
 
 ffonto:DigitalTwin rdfs:subClassOf ffonto:SimulationModel .
+
+ffonto:hasDigitalTwin
+    rdfs:range ffonto:DigitalTwin ;
+    rdfs:domain geo:SpatialObject .
 
 ffonto:representsPhysicalSystem
     rdfs:domain ffonto:DigitalTwin ;
@@ -14405,12 +14739,20 @@ ffonto:representsPhysicalSystem
 
 ffonto:SmokePlume rdfs:subClassOf geo:SpatialObject .
 
+ffonto:producesSmokePlume
+    rdfs:range ffonto:SmokePlume ;
+    rdfs:domain ffonto:FireFront .
+
 ffonto:producedByFire
     rdfs:domain ffonto:SmokePlume ;
     rdfs:range ffonto:FireFront ;
     owl:inverseOf ffonto:producesSmokePlume .
 
 ffonto:EarthObservationPlatform rdfs:subClassOf sosa:Platform .
+
+sosa:isHostedBy
+    rdfs:range ffonto:EarthObservationPlatform ;
+    rdfs:domain sosa:Sensor .
 
 ffonto:hostsSensor
     rdfs:domain ffonto:EarthObservationPlatform ;
@@ -14419,6 +14761,10 @@ ffonto:hostsSensor
 
 ffonto:CombustionProcess rdfs:subClassOf ffonto:PhysicalProcess .
 
+ffonto:isConsumedIn
+    rdfs:range ffonto:CombustionProcess ;
+    rdfs:domain ffonto:FuelCharacteristic .
+
 ffonto:consumesFuel
     rdfs:domain ffonto:CombustionProcess ;
     rdfs:range ffonto:FuelCharacteristic ;
@@ -14426,12 +14772,20 @@ ffonto:consumesFuel
 
 ffonto:AirQualityIndex rdfs:subClassOf ffonto:AirPollutionMetric .
 
+ffonto:isMeasuredByAQI
+    rdfs:range ffonto:AirQualityIndex ;
+    rdfs:domain ffonto:ParticulateMatterPM25 .
+
 ffonto:measuresPollution
     rdfs:domain ffonto:AirQualityIndex ;
     rdfs:range ffonto:ParticulateMatterPM25 ;
     owl:inverseOf ffonto:isMeasuredByAQI .
 
     ffonto:FireFront rdfs:subClassOf geo:SpatialObject .
+
+ffonto:hasFireFront
+    rdfs:range ffonto:FireFront ;
+    rdfs:domain ffonto:WildfireIncident .
 
 ffonto:partOfWildfire
     rdfs:domain ffonto:FireFront ;
@@ -14463,12 +14817,20 @@ ffonto:isModelMonitoredBy rdf:type owl:ObjectProperty ;
 
 ffonto:ThermalCamera rdfs:subClassOf ffonto:RemoteSensor .
 
+ffonto:isDetectedByThermalCamera
+    rdfs:range ffonto:ThermalCamera ;
+    rdfs:domain ffonto:ActiveFireDetection .
+
 ffonto:detectsThermalSignature
     rdfs:domain ffonto:ThermalCamera ;
     rdfs:range ffonto:ActiveFireDetection ;
     owl:inverseOf ffonto:isDetectedByThermalCamera .
     
 ffonto:LogisticsSection rdfs:subClassOf ffonto:IncidentCommandSection .
+
+ffonto:hasLogisticsSupport
+    rdfs:range ffonto:LogisticsSection ;
+    rdfs:domain ffonto:WildfireIncident .
 
 ffonto:providesResourcesFor
     rdfs:domain ffonto:LogisticsSection ;
@@ -14477,12 +14839,20 @@ ffonto:providesResourcesFor
 
 ffonto:ExplainableAI rdfs:subClassOf ffonto:AIModelGovernance .
 
+ffonto:isExplainedBy
+    rdfs:range ffonto:ExplainableAI ;
+    rdfs:domain ffonto:FireBehaviorModel .
+   
 ffonto:explainsModelPrediction
     rdfs:domain ffonto:ExplainableAI ;
     rdfs:range ffonto:FireBehaviorModel ;
     owl:inverseOf ffonto:isExplainedBy .
 
     ffonto:SeasonalFlammability rdfs:subClassOf ffonto:FuelCharacteristic .
+
+ffonto:producesCarbonEmission
+    rdfs:range ffonto:CarbonEmission ;
+    rdfs:domain ffonto:CombustionProcess .
 
 ffonto:releasedDuringFire
     rdfs:domain ffonto:CarbonEmission ;
@@ -14491,6 +14861,10 @@ ffonto:releasedDuringFire
 
     ffonto:VisibilityCategory rdfs:subClassOf ffonto:AirQualityIndex .
 
+ffonto:hasVisibilityCategory
+    rdfs:range ffonto:VisibilityCategory ;
+    rdfs:domain ffonto:SmokePlume .
+
 ffonto:classifiesVisibility
     rdfs:domain ffonto:VisibilityCategory ;
     rdfs:range ffonto:SmokePlume ;
@@ -14498,12 +14872,20 @@ ffonto:classifiesVisibility
 
     ffonto:PredictionUncertainty rdfs:subClassOf ffonto:ConfidenceScore .
 
+ffonto:hasPredictionUncertainty
+    rdfs:range ffonto:PredictionUncertainty ;
+    rdfs:domain ffonto:FireBehaviorModel .
+
 ffonto:quantifiesPrediction
     rdfs:domain ffonto:PredictionUncertainty ;
     rdfs:range ffonto:FireBehaviorModel ;
     owl:inverseOf ffonto:hasPredictionUncertainty .
 
-    ffonto:AudioAnalytics rdfs:subClassOf ffonto:SensorFusion .
+ffonto:AudioAnalytics rdfs:subClassOf ffonto:SensorFusion .
+
+ffonto:isAnalyzedByAudio
+    rdfs:range ffonto:AudioAnalytics ;
+    rdfs:domain ffonto:TelemetryData .
 
 ffonto:analyzesAudioSignal
     rdfs:domain ffonto:AudioAnalytics ;
@@ -14512,12 +14894,20 @@ ffonto:analyzesAudioSignal
 
     ffonto:FireBehaviorModel rdfs:subClassOf ffonto:SimulationModel .
 
+ffonto:isPredictedByModel
+    rdfs:range ffonto:FireBehaviorModel ;
+    rdfs:domain ffonto:FireFront .
+
 ffonto:predictsFireSpread
     rdfs:domain ffonto:FireBehaviorModel ;
     rdfs:range ffonto:FireFront ;
     owl:inverseOf ffonto:isPredictedByModel .
 
     ffonto:PreventionMeasure rdfs:subClassOf ffonto:SafetyMeasure .
+
+ffonto:isPreventedBy
+    rdfs:range ffonto:PreventionMeasure ;
+    rdfs:domain ffonto:WildfireIncident .
 
 ffonto:reducesFireRisk
     rdfs:domain ffonto:PreventionMeasure ;
@@ -14526,12 +14916,20 @@ ffonto:reducesFireRisk
 
     ffonto:TimeSeriesAnalysis rdfs:subClassOf ffonto:DataAnalysisProcess .
 
+ffonto:isAnalyzedTemporally
+    rdfs:range ffonto:TimeSeriesAnalysis ;
+    rdfs:domain ffonto:TelemetryData .
+
 ffonto:analyzesTemporalData
     rdfs:domain ffonto:TimeSeriesAnalysis ;
     rdfs:range ffonto:TelemetryData ;
     owl:inverseOf ffonto:isAnalyzedTemporally .
 
     ffonto:ClimateAnomaly rdfs:subClassOf ffonto:ClimateEvent .
+
+ffonto:isAffectedByAnomaly
+    rdfs:range ffonto:ClimateAnomaly ;
+    rdfs:domain ffonto:FireRegime .
 
 ffonto:affectsClimatePattern
     rdfs:domain ffonto:ClimateAnomaly ;
@@ -14540,12 +14938,20 @@ ffonto:affectsClimatePattern
 
     ffonto:IndoorAirQualityStrategy rdfs:subClassOf ffonto:AirQualityMitigationStrategy .
 
+ffonto:isUsedInStrategy
+    rdfs:range ffonto:IndoorAirQualityStrategy ;
+    rdfs:domain ffonto:AirCleaner .
+
 ffonto:improvesIndoorAir
     rdfs:domain ffonto:IndoorAirQualityStrategy ;
     rdfs:range ffonto:AirCleaner ;
     owl:inverseOf ffonto:isUsedInStrategy .
 
     ffonto:CrowdsourcedReport rdfs:subClassOf ffonto:CitizenObservation .
+
+ffonto:isReportedByCitizen
+    rdfs:range ffonto:CrowdsourcedReport ;
+    rdfs:domain ffonto:WildfireIncident .
 
 ffonto:reportsEvent
     rdfs:domain ffonto:CrowdsourcedReport ;
@@ -14554,12 +14960,20 @@ ffonto:reportsEvent
 
     ffonto:SpotFire rdfs:subClassOf ffonto:FireFront .
 
+ffonto:createsSpotFire
+    rdfs:range ffonto:SpotFire ;
+    rdfs:domain ffonto:CombustionProcess .
+
 ffonto:causedByEmbers
     rdfs:domain ffonto:SpotFire ;
     rdfs:range ffonto:CombustionProcess ;
     owl:inverseOf ffonto:createsSpotFire .
 
     ffonto:ImageContribution rdfs:subClassOf ffonto:CrowdsourcedReport .
+
+ffonto:hasImageContribution
+    rdfs:range ffonto:ImageContribution ;
+    rdfs:domain ffonto:WildfireIncident .
 
 ffonto:providesImageFor
     rdfs:domain ffonto:ImageContribution ;
@@ -14568,12 +14982,20 @@ ffonto:providesImageFor
 
     ffonto:CleanAirShelter rdfs:subClassOf ffonto:EmergencyFacility .
 
+ffonto:isShelteredFrom
+    rdfs:range ffonto:CleanAirShelter ;
+    rdfs:domain ffonto:SmokePlume .
+
 ffonto:providesProtectionFromSmoke
     rdfs:domain ffonto:CleanAirShelter ;
     rdfs:range ffonto:SmokePlume ;
     owl:inverseOf ffonto:isShelteredFrom .
 
     ffonto:DecisionLog rdfs:subClassOf prov:Entity .
+
+ffonto:isRecordedInDecisionLog
+    rdfs:range ffonto:DecisionLog ;
+    rdfs:domain ffonto:IncidentCommand .
 
 ffonto:recordsDecision
     rdfs:domain ffonto:DecisionLog ;
@@ -14582,12 +15004,20 @@ ffonto:recordsDecision
 
     ffonto:FireEvent rdfs:subClassOf prov:Activity .
 
+ffonto:locationOfEvent
+    rdfs:range ffonto:FireEvent ;
+    rdfs:domain geo:SpatialObject .
+
 ffonto:occursAtLocation
     rdfs:domain ffonto:FireEvent ;
     rdfs:range geo:SpatialObject ;
     owl:inverseOf ffonto:locationOfEvent .
 
     ffonto:EnsembleForecast rdfs:subClassOf ffonto:FireBehaviorModel .
+
+ffonto:isCombinedInForecast
+    rdfs:range ffonto:EnsembleForecast ;
+    rdfs:domain ffonto:FireBehaviorModel .
 
 ffonto:combinesForecastModels
     rdfs:domain ffonto:EnsembleForecast ;
@@ -14596,12 +15026,20 @@ ffonto:combinesForecastModels
 
     ffonto:Helispot rdfs:subClassOf geo:SpatialObject .
 
+ffonto:landsAtHelispot
+    rdfs:range ffonto:Helispot ;
+    rdfs:domain ffonto:UAV .
+
 ffonto:usedByHelicopter
     rdfs:domain ffonto:Helispot ;
     rdfs:range ffonto:UAV ;
     owl:inverseOf ffonto:landsAtHelispot .
 
     ffonto:StateForestFireStatistic rdfs:subClassOf ffonto:WildfireStatistic .
+
+ffonto:hasFireStatistic
+    rdfs:range ffonto:StateForestFireStatistic ;
+    rdfs:domain geo:SpatialObject .
 
 ffonto:reportsStatisticFor
     rdfs:domain ffonto:StateForestFireStatistic ;
@@ -14617,9 +15055,13 @@ ffonto:coordinatesWith
 
     ffonto:RemoteSensor rdfs:subClassOf sosa:Sensor .
 
+ffonto:isMeasuredBySensor
+    rdfs:range ffonto:RemoteSensor ;
+    rdfs:domain ffonto:MeteorologicalObservation .
+
 ffonto:collectsEnvironmentalData
     rdfs:domain ffonto:RemoteSensor ;
-    rdfs:range ffonto:MeteorologicalVariable ;
+    rdfs:range ffonto:MeteorologicalObservation ;
     owl:inverseOf ffonto:isMeasuredBySensor .
 
     ffonto:TemporaryFlightRestriction rdfs:subClassOf ffonto:AirspaceManagement .
@@ -14658,12 +15100,20 @@ ffonto:fuelMoistureAffectsCombustion owl:inverseOf ffonto:isCombustionAffectedBy
 
     ffonto:NeighborSupportPlan rdfs:subClassOf ffonto:CommunityPreparednessPlan .
 
+ffonto:hasNeighborSupportPlan
+    rdfs:range ffonto:NeighborSupportPlan ;
+    rdfs:domain ffonto:EvacuationZone .
+
 ffonto:supportsCommunity
     rdfs:domain ffonto:NeighborSupportPlan ;
     rdfs:range ffonto:EvacuationZone ;
     owl:inverseOf ffonto:hasNeighborSupportPlan .
 
     ffonto:AirspaceManagement rdfs:subClassOf ffonto:OperationalStrategy .
+
+ffonto:isManagedBy
+    rdfs:range ffonto:AirspaceManagement ;
+    rdfs:domain ffonto:Airspace .
 
 ffonto:managesAirspace
     rdfs:domain ffonto:AirspaceManagement ;
@@ -14672,12 +15122,20 @@ ffonto:managesAirspace
 
     ffonto:AirConditioner rdfs:subClassOf ffonto:AirCleaner .
 
+ffonto:hasAirConditioner
+    rdfs:range ffonto:AirConditioner ;
+    rdfs:domain ffonto:CleanAirShelter .
+
 ffonto:filtersAirInShelter
     rdfs:domain ffonto:AirConditioner ;
     rdfs:range ffonto:CleanAirShelter ;
     owl:inverseOf ffonto:hasAirConditioner .
 
     ffonto:CardiacIssue rdfs:subClassOf ffonto:HealthImpact .
+
+ffonto:causesCardiacIssue
+    rdfs:range ffonto:CardiacIssue ;
+    rdfs:domain ffonto:ParticulateMatterPM25 .
 
 ffonto:triggeredByAirPollution
     rdfs:domain ffonto:CardiacIssue ;
@@ -14686,12 +15144,20 @@ ffonto:triggeredByAirPollution
 
     ffonto:Airspace rdfs:subClassOf geo:SpatialObject .
 
+ffonto:occursInAirspace
+    rdfs:range ffonto:Airspace ;
+    rdfs:domain ffonto:FlightPath .
+
 ffonto:usedForFlight
     rdfs:domain ffonto:Airspace ;
     rdfs:range ffonto:FlightPath ;
     owl:inverseOf ffonto:occursInAirspace .
 
-    ffonto:Evapotranspiration rdfs:subClassOf ffonto:MeteorologicalVariable .
+    ffonto:Evapotranspiration rdfs:subClassOf ffonto:MeteorologicalObservation .
+
+ffonto:isAffectedByEvapotranspiration
+    rdfs:range ffonto:Evapotranspiration ;
+    rdfs:domain ffonto:FuelMoisture .
 
 ffonto:affectsVegetationMoisture
     rdfs:domain ffonto:Evapotranspiration ;
@@ -14699,6 +15165,10 @@ ffonto:affectsVegetationMoisture
     owl:inverseOf ffonto:isAffectedByEvapotranspiration .
 
     ffonto:PredictiveInterval rdfs:subClassOf ffonto:PredictionUncertainty .
+
+ffonto:hasPredictiveInterval
+    rdfs:range ffonto:PredictiveInterval ;
+    rdfs:domain ffonto:EnsembleForecast .
 
 ffonto:boundsPrediction
     rdfs:domain ffonto:PredictiveInterval ;
