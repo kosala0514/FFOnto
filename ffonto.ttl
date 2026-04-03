@@ -18,13 +18,14 @@
 @prefix vann: <http://purl.org/vocab/vann/> .
 @prefix schema: <https://schema.org/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix time: <http://www.w3.org/2006/time#> .
 
 #################################################################
 # Ontology
 #################################################################
 
 <http://example.org/ffonto#> rdf:type owl:Ontology ;
-                              owl:versionIRI ffonto:V1.0 ;
+                              owl:versionIRI ffonto:V1.2 ;
                               cc:license "" ;
                               dc:abstract "The Forest Fire Ontology (FFONTO) is designed to integrate multi-modal sensor data for early fire detection. It serves as an extensible framework with 'ForestFire' as the root class, incorporating concepts for visual detection, audio monitoring, and environmental conditions."@en ;
                               dc:contributor [ foaf:name "Prof. Dulani Meedeniya"@en ;
@@ -1354,18 +1355,11 @@ ffonto:isMonitoringObservationOf a owl:ObjectProperty ;
 
 ffonto:isMonitoringObservationOf owl:inverseOf ffonto:hasMonitoringObservation .
 
-ffonto:adjacentTo rdf:type owl:ObjectProperty , owl:SymmetricProperty ;
+ffonto:adjacentTo rdf:type owl:ObjectProperty, owl:SymmetricProperty ;
     rdfs:domain ffonto:SpatialUnit ;
     rdfs:range ffonto:SpatialUnit ;
     rdfs:label "adjacent to" ;
-    rdfs:comment "Indicates that two spatial units share a boundary or are directly next to each other." .
-
-ffonto:adjacentOf a owl:ObjectProperty ;
-    rdfs:range ffonto:SpatialUnit ;
-    rdfs:domain ffonto:SpatialUnit ;
-    rdfs:label "inverse of adjacent to"@en .
-
-ffonto:adjacentOf owl:inverseOf ffonto:adjacentTo .
+    rdfs:comment "A symmetric relation indicating that two spatial units share a boundary. No separate inverse is needed as symmetry implies bi-directionality." .
 
 ffonto:reducesSpreadOf rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:SnowCover ;
@@ -1833,11 +1827,17 @@ ffonto:influencedByEnvironmentalCondiction a owl:ObjectProperty ;
 ffonto:influencedByEnvironmentalCondiction owl:inverseOf ffonto:contributesToFireRisk .
 
 ffonto:hasFireEvent rdf:type owl:ObjectProperty ;
-    owl:inverseOf ffonto:occursIn ;
     rdfs:domain ffonto:ForestEcosystem ;
     rdfs:range ffonto:FireEvent ;
     rdfs:label "has fire event" ;
     rdfs:comment "Indicates that a forest ecosystem experienced a fire event." .
+
+ffonto:isFireEventOf rdf:type owl:ObjectProperty ;
+    rdfs:range ffonto:ForestEcosystem ;
+    rdfs:domain ffonto:FireEvent ;
+    rdfs:label "is fire event of" ;
+    owl:inverseOf ffonto:hasFireEvent ;
+    rdfs:comment "Inverse of has fire event" .
 
 ffonto:isComponentOfVegetation rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:Plant ;
@@ -4784,7 +4784,7 @@ ffonto:unit a owl:DatatypeProperty ;
     rdfs:domain ffonto:Result ;
     rdfs:range xsd:string ;
     rdfs:label "unit" ;
-    rdfs:comment "" .
+    rdfs:comment "Specifies the scale or unit used to quantify the value of a ffonto:Result instance." .
 
 ffonto:confidence a owl:DatatypeProperty ;
     rdfs:domain ffonto:Result ;
@@ -5428,6 +5428,13 @@ ffonto:observedProperty a owl:ObjectProperty ;
     rdfs:range ffonto:ObservableProperty ;
     rdfs:label "observed property" ;
     rdfs:comment "The property that was observed or estimated." .
+
+ffonto:observedPropertyOf a owl:ObjectProperty ;
+    rdfs:range ffonto:Result ;
+    rdfs:domain ffonto:ObservableProperty ;
+    rdfs:label "observed property of" ;
+    rdfs:comment "Inverse of observed property." ;
+    owl:inverseOf ffonto:observedProperty .
 
 ffonto:isEvidenceFor a owl:ObjectProperty ;
     rdfs:domain ffonto:Observation ;
@@ -7939,6 +7946,13 @@ ffonto:usedModel rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:MLModel ;
     rdfs:label "used model" .
 
+ffonto:modelOf rdf:type owl:ObjectProperty ;
+    rdfs:range ffonto:VisionModelScores ;
+    rdfs:domain ffonto:MLModel ;
+    rdfs:label "model of" ;
+    rdfs:comment "inverse of use model" ;
+    owl:inverseOf ffonto:usedModel .
+
 ffonto:hasSmokeLayers rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:SmokeObservation ;
     rdfs:range ffonto:SmokeLayerObservation ;
@@ -8020,23 +8034,22 @@ ffonto:labelSourceOfOf a owl:ObjectProperty ;
 ffonto:labelSourceOfOf owl:inverseOf ffonto:labelSourceOf .
 
 ffonto:hasLabelAssignment rdf:type owl:ObjectProperty ;
-    rdfs:label "image has label assignment" ;
-    rdfs:comment "Connects an image observtaion to zero or more LabelAssignment instances." ;
+    rdfs:label "has label assignment"@en ;
+    rdfs:comment "Connects an image observation to zero or more LabelAssignment instances."@en ;
     rdfs:domain ffonto:ImageObservation ;
     rdfs:range ffonto:LabelAssignment .
 
 ffonto:isLabelAssignmentOf rdf:type owl:ObjectProperty ;
-    rdfs:label "image has label assignment of" ;
-    rdfs:comment "Inverse - hasLabelAssignment." ;
+    rdfs:label "is label assignment of"@en ;
+    rdfs:comment "Connects a label assignment back to the original image observation that it annotates."@en ;
+    rdfs:domain ffonto:LabelAssignment ;
     rdfs:range ffonto:ImageObservation ;
-    rdfs:domain ffonto:LabelAssignment .
+    owl:inverseOf ffonto:hasLabelAssignment .
 
 ffonto:opacity rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:LabelAssignment ;
     rdfs:range xsd:string ;
     rdfs:label "opacity" .
-
-ffonto:isLabelAssignmentOf owl:inverseOf ffonto:hasLabelAssignment .
 
 ffonto:audioAttachedTo rdf:type owl:ObjectProperty ;
     rdfs:label "audio attached to" ;
@@ -9169,7 +9182,7 @@ ffonto:mediaURI rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:Observation ;
     rdfs:range xsd:string ;
     rdfs:label "media uri" ;
-    rdfs:comment "" .
+    rdfs:comment "The URI pointing to a digital media file (image an daudio) that captures or supports the observation." .
 
 ffonto:sourceLiteral rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:Observation ;
@@ -9379,12 +9392,6 @@ ffonto:captureTimeUTC rdf:type owl:DatatypeProperty ;
     rdfs:range xsd:dateTime ;
     rdfs:label "capture time UTC" .
 
-ffonto:captureTimeUTC_present rdf:type owl:DatatypeProperty ;
-    rdfs:domain ffonto:Observation ;
-    rdfs:range xsd:boolean ;
-    rdfs:label "capture time UTC present" .
-
-
 ffonto:audioTopK rdf:type owl:DatatypeProperty ;
     rdfs:domain ffonto:AudioObservation ;
     rdfs:range xsd:string ;
@@ -9462,7 +9469,16 @@ ffonto:checksumsRecorded rdf:type owl:DatatypeProperty ;
 
 ffonto:hasTemporalExtent rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:Observation ;
+    rdfs:label "has temporal extent" ;
+    rdfs:comment "has temporal extent for each observation" ;
     rdfs:range ffonto:TemporalExtent .
+
+ffonto:isTemporalExtentHas rdf:type owl:ObjectProperty ;
+    rdfs:range ffonto:Observation ;
+    rdfs:label "is temporal extent is" ;
+    rdfs:comment "Inverse of has temporal extent" ;
+    rdfs:domain ffonto:TemporalExtent ;
+    owl:inverseOf ffonto:hasTemporalExtent .
 
 ffonto:TemporalExtent rdf:type owl:Class .
 
@@ -9492,7 +9508,15 @@ ffonto:hasDayName rdf:type owl:DatatypeProperty ;
 
 ffonto:hasSpatialExtent rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:Observation ;
-    rdfs:range ffonto:SpatialExtent .
+    rdfs:label "has spatial extent" ;
+    rdfs:range ffonto:SpatialExtent ;
+    owl:inverseOf ffonto:isSpatialExtentof.
+
+ffonto:isSpatialExtentof rdf:type owl:ObjectProperty ;
+    rdfs:range ffonto:Observation ;
+    rdfs:label "is spatial extent of" ;
+    rdfs:comment "Inverse of has spatial extent" ;
+    rdfs:domain ffonto:SpatialExtent .
 
 ffonto:SpatialExtent rdf:type owl:Class .
 
@@ -11101,7 +11125,7 @@ ffonto:hasModel rdf:type owl:ObjectProperty ;
 
 ffonto:isModelOf rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:ProvenanceRecord ;
-    rdfs:model ffonto:MLModel ;
+    rdfs:domain ffonto:MLModel ;
     rdfs:label "is model of" ;
     owl:inverseOf ffonto:hasModel .
 
@@ -11561,18 +11585,6 @@ ffonto:prioritizesOf a owl:ObjectProperty ;
     rdfs:domain owl:Thing .
 
 ffonto:prioritizesOf owl:inverseOf ffonto:prioritizes .
-
-ffonto:hasShelterType rdf:type owl:ObjectProperty ;
-    rdfs:domain ffonto:FireShelter ;
-    rdfs:range ffonto:FireShelter ;
-    rdfs:label "has shelter type" .
-
-ffonto:isShelterTypeOf a owl:ObjectProperty ;
-    rdfs:range ffonto:FireShelter ;
-    rdfs:domain ffonto:FireShelter ;
-    rdfs:label "inverse of is shelter type"@en .
-
-ffonto:isShelterTypeOf owl:inverseOf ffonto:hasShelterType .
 
 ffonto:hasCommunicationMethod rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:IncidentCommandSystem ;
@@ -12382,10 +12394,6 @@ ffonto:ClimateChangeChallenge rdf:type ffonto:ChallengeOpportunity ;
 ffonto:TechOpportunity rdf:type ffonto:ChallengeOpportunity ;
     rdfs:label "Technology Opportunity" ;
     ffonto:recommendedAction "Improved detection, modeling and communications." .
-
-ffonto:PostFirePlan2026 rdf:type ffonto:PostFireRehabilitation ;
-    rdfs:label "Post-Fire Rehabilitation Plan 2026" ;
-    ffonto:recommendedAction "Erosion control, revegetation, infrastructure repair." .
 
 ffonto:ErosionSeedMix rdf:type ffonto:ErosionControl ;
     rdfs:label "Erosion Control Seed Mix" ;
@@ -13323,39 +13331,6 @@ ffonto:isLocationOf a owl:ObjectProperty ;
 
 ffonto:isLocationOf owl:inverseOf ffonto:hasLocation .
 
-ffonto:locatedIn rdf:type owl:ObjectProperty ;
-    rdfs:label "located in" ;
-    rdfs:comment "Indicates that a place is contained within another place." ;
-    rdfs:domain ffonto:FireEvent ;
-    rdfs:range ffonto:FireEvent ;
-    owl:inverseOf ffonto:containsPlace .
-
-ffonto:locatedOf a owl:ObjectProperty ;
-    rdfs:label "inverse of located in"@en ;
-    rdfs:range ffonto:FireEvent ;
-    rdfs:domain ffonto:FireEvent  .
-
-ffonto:locatedOf owl:inverseOf ffonto:locatedIn .
-
-ffonto:containsPlace rdf:type owl:ObjectProperty ;
-    rdfs:label "contains place" ;
-    rdfs:comment "Indicates that a place spatially contains another place." ;
-    rdfs:domain ffonto:FireEvent ;
-    rdfs:range ffonto:FireEvent .
-
-ffonto:partOf rdf:type owl:ObjectProperty ;
-    rdfs:label "part of" ;
-    rdfs:comment "Indicates that a spatial entity is part of another spatial entity." ;
-    rdfs:domain ffonto:SpatialEntity ;
-    rdfs:range ffonto:SpatialEntity ;
-    owl:inverseOf ffonto:hasPart .
-
-ffonto:hasPart rdf:type owl:ObjectProperty ;
-    rdfs:label "has part" ;
-    rdfs:comment "Indicates that a spatial entity contains another spatial entity as part." ;
-    rdfs:domain ffonto:SpatialEntity ;
-    rdfs:range ffonto:SpatialEntity .
-
 ffonto:hasLatitude rdf:type owl:DatatypeProperty ;
     rdfs:label "latitude" ;
     rdfs:comment "Latitude coordinate of a spatial entity." ;
@@ -13953,7 +13928,6 @@ ffonto:generatesPyroWeatherOf rdfs:comment "Inverse relation linking pyro-weathe
 ffonto:isImageAssetOf rdfs:comment "Inverse relation linking image assets back to the collection or project they belong to."@en .
 ffonto:isUnderstoryOf rdfs:comment "Inverse relation linking understory vegetation descriptions to the forest stands they occupy."@en .
 ffonto:burningNearRiverInverse rdfs:comment "Inverse relation indicating burning activities located near riverine environments linked back to the source."@en .
-ffonto:isShelterTypeOf rdfs:comment "Inverse relation linking shelter type classifications back to the facilities or plans that define them."@en .
 ffonto:isIgnitionSourceOf rdfs:comment "Inverse relation linking ignition source records back to the fire events they initiated."@en .
 ffonto:isEcosystemImpactOf rdfs:comment "Inverse relation linking ecosystem impacts back to causative disturbances or events."@en .
 ffonto:workingNearOf rdfs:comment "Inverse relation indicating personnel or equipment working near a referenced location or hazard."@en .
@@ -14233,7 +14207,7 @@ ffonto:isAssessedBy rdf:type owl:ObjectProperty ;
     rdfs:range ffonto:BAERAssessment .
 
 ffonto:ActiveFireDetection rdf:type owl:Class ;
-    rdfs:subClassOf sosa:Observation .
+    rdfs:subClassOf ffonto:Observation .
 
 ffonto:detectsFire rdf:type owl:ObjectProperty ;
     rdfs:domain ffonto:ActiveFireDetection ;
@@ -14547,7 +14521,7 @@ ffonto:hasPreparednessPlan
     rdfs:domain ffonto:EvacuationZone ;
     rdfs:range ffonto:ReadySetGoPlan .
 
-ffonto:OperationalPeriod rdfs:subClassOf time:TemporalEntity .
+ffonto:OperationalPeriod rdfs:subClassOf ffonto:TemporalExtent .
 
 ffonto:occursDuring
     rdfs:domain ffonto:WildfireIncident ;
@@ -15046,14 +15020,9 @@ ffonto:reportsStatisticFor
     rdfs:range geo:SpatialObject ;
     owl:inverseOf ffonto:hasFireStatistic .
 
-    ffonto:SwarmUAV rdfs:subClassOf ffonto:UAV .
+ffonto:SwarmUAV rdfs:subClassOf ffonto:UAV .
 
-ffonto:coordinatesWith
-    rdfs:domain ffonto:SwarmUAV ;
-    rdfs:range ffonto:SwarmUAV ;
-    owl:inverseOf ffonto:coordinatesWith .
-
-    ffonto:RemoteSensor rdfs:subClassOf sosa:Sensor .
+ffonto:RemoteSensor rdfs:subClassOf sosa:Sensor .
 
 ffonto:isMeasuredBySensor
     rdfs:range ffonto:RemoteSensor ;
@@ -15176,3 +15145,1724 @@ ffonto:boundsPrediction
     owl:inverseOf ffonto:hasPredictiveInterval .
 
 # ffonto:ResilienceMetrics, and ffonto:RestorationAction, ffonto:Measurement
+
+ffonto:TemporalExtent a owl:Class ;
+    rdfs:label "temporal extent"@en ;
+    rdfs:comment "The specific timeframe, duration, or time interval during which an event or phenomenon occurs."@en .
+
+ffonto:SpatialExtent a owl:Class ;
+    rdfs:label "spatial extent"@en ;
+    rdfs:comment "The physical area, geographic boundary, or geospatial footprint covered by an event or entity."@en .
+
+ffonto:IncidentReport a owl:Class ;
+    rdfs:label "incident report"@en ;
+    rdfs:comment "A formal document or record detailing the occurrence, response, and conditions of a specific emergency event."@en .
+
+ffonto:SimulationModel a owl:Class ;
+    rdfs:label "simulation model"@en ;
+    rdfs:comment "A computational model used to simulate physical processes, such as fire spread or smoke dispersion."@en .
+
+ffonto:WildfireIncident a owl:Class ;
+    rdfs:label "wildfire incident"@en ;
+    rdfs:comment "An uncontrolled fire occurring in nature that requires an emergency response."@en .
+
+ffonto:HealthImpact a owl:Class ;
+    rdfs:label "health impact"@en ;
+    rdfs:comment "The effect of an event or environmental condition (e.g., smoke inhalation) on human or animal health."@en .
+
+ffonto:AirQualityMitigationDevice a owl:Class ;
+    rdfs:label "air quality mitigation device"@en ;
+    rdfs:comment "A physical apparatus designed to monitor, filter, or improve air quality conditions during or after a fire."@en .
+
+ffonto:AirQualityMitigationStrategy a owl:Class ;
+    rdfs:label "air quality mitigation strategy"@en ;
+    rdfs:comment "A procedural or policy-based approach to reducing the harmful effects of air pollution on a population."@en .
+
+ffonto:AirPollutionMetric a owl:Class ;
+    rdfs:label "air pollution metric"@en ;
+    rdfs:comment "A quantifiable measure used to assess the concentration of pollutants in the air."@en .
+
+ffonto:PredictionMetric a owl:Class ;
+    rdfs:label "prediction metric"@en ;
+    rdfs:comment "A forecasted value or indicator generated by a model, such as the predicted speed of fire spread."@en .
+
+ffonto:UAVOperation a owl:Class ;
+    rdfs:label "UAV operation"@en ;
+    rdfs:comment "A planned flight or deployment of an Unmanned Aerial Vehicle (UAV) for observation, communication, or mitigation."@en .
+
+ffonto:WildfireStatistic a owl:Class ;
+    rdfs:label "wildfire statistic"@en ;
+    rdfs:comment "A quantitative data point or aggregated metric regarding a wildfire, such as acres burned or containment percentage."@en .
+
+ffonto:EarthObservationData a owl:Class ;
+    rdfs:label "earth observation data"@en ;
+    rdfs:comment "Data collected from remote sensing platforms, such as satellites or UAVs, to monitor environmental conditions."@en .
+
+ffonto:AIModelGovernance a owl:Class ;
+    rdfs:label "AI model governance"@en ;
+    rdfs:comment "The policies, procedures, and ethical guidelines governing the deployment and use of artificial intelligence models within the system."@en .
+
+ffonto:IncidentCommandRole a owl:Class ;
+    rdfs:label "incident command role"@en ;
+    rdfs:comment "A designated function or position within the Incident Command System (ICS) managing the emergency response."@en .
+
+ffonto:IncidentCommandSection a owl:Class ;
+    rdfs:label "incident command section"@en ;
+    rdfs:comment "A primary organizational division within the Incident Command System, such as Operations, Planning, or Logistics."@en .
+
+ffonto:CommunityPreparednessPlan a owl:Class ;
+    rdfs:label "community preparedness plan"@en ;
+    rdfs:comment "A documented strategy outlining procedures and resources for a community to prepare for and respond to emergencies."@en .
+
+ffonto:OperationalStrategy a owl:Class ;
+    rdfs:label "operational strategy"@en ;
+    rdfs:comment "A high-level plan of action designed to achieve specific goals during an incident response."@en .
+
+ffonto:DataAnalysisProcess a owl:Class ;
+    rdfs:label "data analysis process"@en ;
+    rdfs:comment "The systematic computational or manual review of data to extract insights and inform decision-making."@en .
+
+ffonto:PhysicalProcess a owl:Class ;
+    rdfs:label "physical process"@en ;
+    rdfs:comment "A natural or environmental mechanism, such as combustion or wind dynamics, affecting the incident."@en .
+
+ffonto:EmergencyFacility a owl:Class ;
+    rdfs:label "emergency facility"@en ;
+    rdfs:comment "A physical building or location, such as a shelter or fire station, utilized during an incident response."@en .
+
+ffonto:CommunicationDevice a owl:Class ;
+    rdfs:label "communication device"@en ;
+    rdfs:comment "Hardware used to transmit or receive information between responders, UAVs, or command centers."@en .
+
+prov:Entity a owl:Class ;
+    rdfs:label "entity"@en ;
+    rdfs:comment "A physical, digital, conceptual, or other kind of thing with some fixed aspects; entities may be real or imagined."@en .
+
+prov:Activity a owl:Class ;
+    rdfs:label "activity"@en ;
+    rdfs:comment "Something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities."@en .
+
+sosa:Platform a owl:Class ;
+    rdfs:label "platform"@en ;
+    rdfs:comment "An entity that hosts other entities, particularly Sensors, Actuators, Samplers, and other Platforms."@en .
+
+ffonto:EnvironmentalImpact a owl:Class ;
+    rdfs:label "environmental impact"@en ;
+    rdfs:comment "The observable or measurable effect of an event or action on the natural environment, such as vegetation loss or soil degradation."@en .
+
+ffonto:InformationSystem a owl:Class ;
+    rdfs:label "information system"@en ;
+    rdfs:comment "A structured set of software, hardware, and networks used to collect, process, manage, and distribute data."@en .
+
+ffonto:ClimatePattern a owl:Class ;
+    rdfs:label "climate pattern"@en ;
+    rdfs:comment "A recurring or sustained meteorological trend within a specific region or on a global scale (e.g., El Niño)."@en .
+
+ffonto:FireBehaviorMetric a owl:Class ;
+    rdfs:label "fire behavior metric"@en ;
+    rdfs:comment "A quantitative measure used to describe how a fire burns, such as rate of spread, flame length, or intensity."@en .
+
+ffonto:ClimateEvent a owl:Class ;
+    rdfs:label "climate event"@en ;
+    rdfs:comment "A specific, significant occurrence of weather or atmospheric conditions, such as a drought, heatwave, or storm."@en .
+
+ffonto:collectsEnvironmentalData a owl:ObjectProperty ;
+    rdfs:label "collects environmental data"@en ;
+    rdfs:comment "Indicates that an entity, such as a sensor platform or UAV, gathers data regarding environmental conditions."@en .
+
+ffonto:appliesToUAV a owl:ObjectProperty ;
+    rdfs:label "applies to UAV"@en ;
+    rdfs:comment "Relates a rule, strategy, protocol, or physical attachment specifically to an Unmanned Aerial Vehicle."@en .
+
+ffonto:ensuresContinuityOf a owl:ObjectProperty ;
+    rdfs:label "ensures continuity of"@en ;
+    rdfs:comment "Links a system, plan, or entity to the operational process or service it sustains during disruptions."@en .
+
+ffonto:reportsEvent a owl:ObjectProperty ;
+    rdfs:label "reports event"@en ;
+    rdfs:comment "Connects a system, sensor, or human agent to an incident or occurrence that it has documented or signaled."@en .
+
+ffonto:influencesFireBehaviorByCharacteristicOf a owl:ObjectProperty ;
+    rdfs:label "influences fire behavior by characteristic of"@en ;
+    rdfs:comment "Relates an environmental or terrain feature to the specific way its characteristics alter fire dynamics."@en .
+
+ffonto:integratesData a owl:ObjectProperty ;
+    rdfs:label "integrates data"@en ;
+    rdfs:comment "Shows that a system, workflow, or process combines multiple discrete data sources into a unified dataset."@en .
+
+ffonto:appliedToFire a owl:ObjectProperty ;
+    rdfs:label "applied to fire"@en ;
+    rdfs:comment "Connects a mitigation strategy, resource allocation, or predictive model to the specific fire incident it addresses."@en .
+
+ffonto:impactAffectsWildlife a owl:ObjectProperty ;
+    rdfs:label "impact affects wildlife"@en ;
+    rdfs:comment "Indicates that a particular environmental or physical impact has direct consequences for local animal populations or habitats."@en .
+
+ffonto:flammabilityInfluencesRiskAssessment a owl:ObjectProperty ;
+    rdfs:label "flammability influences risk assessment"@en ;
+    rdfs:comment "Relates the combustible characteristics of an area or material to the calculated operational risk level."@en .
+
+ffonto:hasDigitalTwin a owl:ObjectProperty ;
+    rdfs:label "has digital twin"@en ;
+    rdfs:comment "Links a physical entity, system, or environment to its virtual, real-time computational replica."@en .
+
+ffonto:hasLogisticsSupport a owl:ObjectProperty ;
+    rdfs:label "has logistics support"@en ;
+    rdfs:comment "Connects an operation, incident, or entity to the supply chain and resource management framework sustaining it."@en .
+
+ffonto:quantifiesPrediction a owl:ObjectProperty ;
+    rdfs:label "quantifies prediction"@en ;
+    rdfs:comment "Links a numerical metric or model output to the specific forecast or estimate it represents."@en .
+
+ffonto:monitorsAirspaceOf a owl:ObjectProperty ;
+    rdfs:label "monitors airspace of"@en ;
+    rdfs:comment "Indicates that a system or entity is observing the aerial zone above a specific location or incident."@en .
+
+ffonto:causesRespiratoryIssue a owl:ObjectProperty ;
+    rdfs:label "causes respiratory issue"@en ;
+    rdfs:comment "Relates a pollutant, condition, or event (like a smoke plume) to the breathing-related health problems it induces."@en .
+
+ffonto:monitorsModel a owl:ObjectProperty ;
+    rdfs:label "monitors model"@en ;
+    rdfs:comment "Connects a governance framework, overarching system, or human operator to the AI or simulation model being overseen."@en .
+
+ffonto:sendsAlert a owl:ObjectProperty ;
+    rdfs:label "sends alert"@en ;
+    rdfs:comment "Indicates that a system, device, or agent transmits a warning or notification regarding a specific condition."@en .
+
+ffonto:validatesDataOf a owl:ObjectProperty ;
+    rdfs:label "validates data of"@en ;
+    rdfs:comment "Links a verification process, algorithm, or authority to the information source or dataset being checked for accuracy."@en .
+
+ffonto:weatherInfluencesFireBehaviorModel a owl:ObjectProperty ;
+    rdfs:label "weather influences fire behavior model"@en ;
+    rdfs:comment "Relates meteorological conditions to the computational model predicting fire spread and dynamics."@en .
+
+ffonto:derivedFromFireOf a owl:ObjectProperty ;
+    rdfs:label "derived from fire of"@en ;
+    rdfs:comment "Links data, emissions, impacts, or statistics back to the specific fire incident that generated them."@en .
+
+ffonto:improvesAirQuality a owl:ObjectProperty ;
+    rdfs:label "improves air quality"@en ;
+    rdfs:comment "Connects an action, mitigation strategy, or device to its positive effect on atmospheric conditions."@en .
+
+ffonto:allocatesResource a owl:ObjectProperty ;
+    rdfs:label "allocates resource"@en ;
+    rdfs:comment "Indicates the distribution or assignment of personnel, equipment, or funds to a specific task or location."@en .
+
+ffonto:carriesSensor a owl:ObjectProperty ;
+    rdfs:label "carries sensor"@en ;
+    rdfs:comment "Links a platform, such as a UAV or ground vehicle, to the observational hardware it physically transports."@en .
+
+ffonto:estimatedOf a owl:ObjectProperty ;
+    rdfs:label "estimated of"@en ;
+    rdfs:comment "Relates a calculated or predicted value to the physical entity or phenomenon being measured."@en .
+
+ffonto:isRecordedInDecisionLog a owl:ObjectProperty ;
+    rdfs:label "is recorded in decision log"@en ;
+    rdfs:comment "Links an action, command, or rationale to the official administrative record tracking operational choices."@en .
+
+ffonto:isFireWeatherIndexInfluencedByClimateDriver a owl:ObjectProperty ;
+    rdfs:label "is fire weather index influenced by climate driver"@en ;
+    rdfs:comment "Connects a calculated fire danger rating to the overarching meteorological patterns affecting it."@en .
+
+ffonto:occursDuring a owl:ObjectProperty ;
+    rdfs:label "occurs during"@en ;
+    rdfs:comment "A temporal relationship linking an event or action to the timeframe or larger incident in which it happens."@en .
+
+ffonto:producesCarbonEmission a owl:ObjectProperty ;
+    rdfs:label "produces carbon emission"@en ;
+    rdfs:comment "Links a physical process or event, such as a wildfire combustion, to the greenhouse gases it releases."@en .
+
+ffonto:handlesFinanceFor a owl:ObjectProperty ;
+    rdfs:label "handles finance for"@en ;
+    rdfs:comment "Relates an administrative section, role, or system to the incident or operation it funds and tracks."@en .
+
+ffonto:briefsIncident a owl:ObjectProperty ;
+    rdfs:label "briefs incident"@en ;
+    rdfs:comment "Connects an incident command role, document, or report to the emergency event it provides status updates for."@en .
+
+ffonto:usesAirCleaner a owl:ObjectProperty ;
+    rdfs:label "uses air cleaner"@en ;
+    rdfs:comment "Indicates that a facility, location, or operation utilizes a filtration device to improve local air quality."@en .
+
+ffonto:producesSmokePlume a owl:ObjectProperty ;
+    rdfs:label "produces smoke plume"@en ;
+    rdfs:comment "Links a combustion event, like a wildfire, to the visible, measurable column of smoke it generates."@en .
+
+ffonto:fuelInfluencesFireBehavior a owl:ObjectProperty ;
+    rdfs:label "fuel influences fire behavior"@en ;
+    rdfs:comment "Relates the combustible material (biomass) in an area to how its properties dictate the intensity and spread of a fire."@en .
+
+ffonto:restrictsAirspace a owl:ObjectProperty ;
+    rdfs:label "restricts airspace"@en ;
+    rdfs:comment "Indicates that a policy, hazard condition, or command decision limits flight operations within a specific zone."@en .
+
+ffonto:indicatesCombustionOf a owl:ObjectProperty ;
+    rdfs:label "indicates combustion of"@en ;
+    rdfs:comment "Links a metric, observation, or sensor reading to the specific material or geographic area currently burning."@en .
+
+ffonto:isVerifiedBy a owl:ObjectProperty ;
+    rdfs:label "is verified by"@en ;
+    rdfs:comment "Connects a data point, report, or model output to the entity, system, or process confirming its accuracy."@en .
+
+ffonto:carriesSensorOf a owl:ObjectProperty ;
+    rdfs:label "carries sensor of"@en ;
+    rdfs:comment "Relates a carrying platform to the specific type, network, or owner of the sensor it is equipped with."@en .
+
+ffonto:causedByEmbers a owl:ObjectProperty ;
+    rdfs:label "caused by embers"@en ;
+    rdfs:comment "Indicates that a secondary fire or ignition was started by airborne burning debris (embers)."@en .
+
+ffonto:isUsedInStrategy a owl:ObjectProperty ;
+    rdfs:label "is used in strategy"@en ;
+    rdfs:comment "Links a resource, tool, or tactic to the broader operational plan or strategy it supports."@en .
+
+ffonto:isPreventedBy a owl:ObjectProperty ;
+    rdfs:label "is prevented by"@en ;
+    rdfs:comment "Relates a hazard, incident, or negative outcome to the action, policy, or entity that stops it from occurring."@en .
+
+ffonto:isOperationalPeriodOf a owl:ObjectProperty ;
+    rdfs:label "is operational period of"@en ;
+    rdfs:comment "Connects a defined timeframe or shift to the specific incident or operation it regulates."@en .
+
+ffonto:followsFlightPath a owl:ObjectProperty ;
+    rdfs:label "follows flight path"@en ;
+    rdfs:comment "Indicates the pre-planned or dynamic aerial route navigated by an aircraft or UAV."@en .
+
+ffonto:recordsEmission a owl:ObjectProperty ;
+    rdfs:label "records emission"@en ;
+    rdfs:comment "Links a sensor, log, or database to the specific release of gases or particulates it measures."@en .
+
+ffonto:detectsThermalSignature a owl:ObjectProperty ;
+    rdfs:label "detects thermal signature"@en ;
+    rdfs:comment "Relates a sensor or platform to the infrared or heat-based anomaly it identifies."@en .
+
+ffonto:isMeasuredBySensor a owl:ObjectProperty ;
+    rdfs:label "is measured by sensor"@en ;
+    rdfs:comment "Connects a physical property, condition, or phenomenon to the hardware device that quantifies it."@en .
+
+ffonto:hasContinuityStrategy a owl:ObjectProperty ;
+    rdfs:label "has continuity strategy"@en ;
+    rdfs:comment "Links an organization, system, or operation to the plan designed to maintain its essential functions during a disruption."@en .
+
+ffonto:affectsForestArea a owl:ObjectProperty ;
+    rdfs:label "affects forest area"@en ;
+    rdfs:comment "Indicates that an event, phenomenon, or policy impacts a specific wooded geographic region."@en .
+
+ffonto:evaluatesRiskBy a owl:ObjectProperty ;
+    rdfs:label "evaluates risk by"@en ;
+    rdfs:comment "Relates an assessment process or entity to the methodology, metric, or model used to calculate danger."@en .
+
+ffonto:isAccessRestrictedBy a owl:ObjectProperty ;
+    rdfs:label "is access restricted by"@en ;
+    rdfs:comment "Links a geographic area or facility to the policy, hazard, or authority that limits entry."@en .
+
+ffonto:partOfIncidentCommand a owl:ObjectProperty ;
+    rdfs:label "part of incident command"@en ;
+    rdfs:comment "Indicates that a person, role, or unit operates within the organizational structure of the Incident Command System."@en .
+
+ffonto:isEvacuationZoneFor a owl:ObjectProperty ;
+    rdfs:label "is evacuation zone for"@en ;
+    rdfs:comment "Relates a designated geographic area to the specific incident or population it is intended to clear and protect."@en .
+
+ffonto:mayCauseIgnitionOf a owl:ObjectProperty ;
+    rdfs:label "may cause ignition of"@en ;
+    rdfs:comment "Indicates the potential for a heat source, event, or material to start a fire in a specific target or environment."@en .
+
+ffonto:hasPreparednessPlan a owl:ObjectProperty ;
+    rdfs:label "has preparedness plan"@en ;
+    rdfs:comment "Links a community, organization, or facility to its documented strategy for anticipating and responding to emergencies."@en .
+
+ffonto:usedOf a owl:ObjectProperty ;
+    rdfs:label "used of"@en ;
+    rdfs:comment "Relates a consumed or applied resource back to its original source, system, or categorical classification."@en .
+
+ffonto:issuesEvacuationWarningOf a owl:ObjectProperty ;
+    rdfs:label "issues evacuation warning of"@en ;
+    rdfs:comment "Connects an authority or system to the specific geographic area or incident requiring civilian evacuation."@en .
+
+ffonto:evaluatesPrediction a owl:ObjectProperty ;
+    rdfs:label "evaluates prediction"@en ;
+    rdfs:comment "Links a review process, system, or human agent to the forecast or model output it is assessing for accuracy."@en .
+
+ffonto:combinesForecastModels a owl:ObjectProperty ;
+    rdfs:label "combines forecast models"@en ;
+    rdfs:comment "Indicates that a system or process integrates multiple predictive models to generate a synthesized output."@en .
+
+ffonto:environmentalFactorAffectsFireSpread a owl:ObjectProperty ;
+    rdfs:label "environmental factor affects fire spread"@en ;
+    rdfs:comment "Relates a natural condition (like wind or terrain) to its influence on the rate and direction of a fire."@en .
+
+ffonto:supportsCommunity a owl:ObjectProperty ;
+    rdfs:label "supports community"@en ;
+    rdfs:comment "Links a plan, resource, or organization to the civilian population it aids or protects."@en .
+
+ffonto:protectsSystem a owl:ObjectProperty ;
+    rdfs:label "protects system"@en ;
+    rdfs:comment "Indicates that a mitigation strategy, policy, or device safeguards a technological or infrastructural system."@en .
+
+ffonto:climateDriverInfluencesFireWeatherIndex a owl:ObjectProperty ;
+    rdfs:label "climate driver influences fire weather index"@en ;
+    rdfs:comment "Connects overarching climate phenomena to the calculated daily fire danger metrics they impact."@en .
+
+ffonto:isModelMonitoredBy a owl:ObjectProperty ;
+    rdfs:label "is model monitored by"@en ;
+    rdfs:comment "Relates a computational or AI model to the oversight entity, system, or governance framework tracking its performance."@en .
+
+ffonto:hasNeighborSupportPlan a owl:ObjectProperty ;
+    rdfs:label "has neighbor support plan"@en ;
+    rdfs:comment "Links a community or jurisdiction to a mutual aid agreement or strategy for assisting adjacent areas."@en .
+
+ffonto:causesDisease a owl:ObjectProperty ;
+    rdfs:label "causes disease"@en ;
+    rdfs:comment "Indicates that an environmental hazard (like smoke inhalation) or event leads to specific health conditions or illnesses."@en .
+
+ffonto:isSupportedByDSS a owl:ObjectProperty ;
+    rdfs:label "is supported by DSS"@en ;
+    rdfs:comment "Links a decision, role, or operation to the Decision Support System providing data and analytical guidance."@en .
+
+ffonto:isProtectedByPrivacyPolicy a owl:ObjectProperty ;
+    rdfs:label "is protected by privacy policy"@en ;
+    rdfs:comment "Relates a dataset, system, or user to the regulatory framework ensuring data confidentiality and ethical use."@en .
+
+ffonto:isDetectedBy a owl:ObjectProperty ;
+    rdfs:label "is detected by"@en ;
+    rdfs:comment "Connects a phenomenon, incident, or entity to the sensor, system, or agent that discovers it."@en .
+
+ffonto:collectedBySatellite a owl:ObjectProperty ;
+    rdfs:label "collected by satellite"@en ;
+    rdfs:comment "Indicates that specific earth observation data or imagery was gathered by an orbital platform."@en .
+
+ffonto:detectsFire a owl:ObjectProperty ;
+    rdfs:label "detects fire"@en ;
+    rdfs:comment "Links a system, sensor, or observer to the active combustion event it identifies."@en .
+
+ffonto:reportedThrough a owl:ObjectProperty ;
+    rdfs:label "reported through"@en ;
+    rdfs:comment "Relates an incident or data point to the communication channel or system used to transmit it."@en .
+
+ffonto:affectsVegetationMoisture a owl:ObjectProperty ;
+    rdfs:label "affects vegetation moisture"@en ;
+    rdfs:comment "Indicates that a climate event or weather condition alters the water content of plant fuel loads."@en .
+
+ffonto:isAirspaceRestrictedBy a owl:ObjectProperty ;
+    rdfs:label "is airspace restricted by"@en ;
+    rdfs:comment "Links a designated flight zone to the authority, incident, or condition enforcing a temporary flight restriction (TFR)."@en .
+
+ffonto:occursInArea a owl:ObjectProperty ;
+    rdfs:label "occurs in area"@en ;
+    rdfs:comment "Connects an event, operation, or incident to its specific geospatial location or physical boundary."@en .
+
+ffonto:createsSpotFire a owl:ObjectProperty ;
+    rdfs:label "creates spot fire"@en ;
+    rdfs:comment "Indicates that a primary fire or emission (like embers) ignites a new, secondary fire outside the main perimeter."@en .
+
+ffonto:reportsIncidentStatus a owl:ObjectProperty ;
+    rdfs:label "reports incident status"@en ;
+    rdfs:comment "Links an agent, system, or document to the current operational condition or updates of an emergency event."@en .
+
+ffonto:hasFireStatistic a owl:ObjectProperty ;
+    rdfs:label "has fire statistic"@en ;
+    rdfs:comment "Relates a wildfire incident or region to a specific quantitative metric, such as acreage burned or containment levels."@en .
+
+ffonto:fuelMoistureAffectsCombustion a owl:ObjectProperty ;
+    rdfs:label "fuel moisture affects combustion"@en ;
+    rdfs:comment "Connects the water content of biomass to its influence on the ignition likelihood and burning rate of a fire."@en .
+
+ffonto:mayCauseIgnition a owl:ObjectProperty ;
+    rdfs:label "may cause ignition"@en ;
+    rdfs:comment "Indicates the general capability of a condition, material, or event to act as a heat source that starts a fire."@en .
+
+ffonto:isDetectedByThermalCamera a owl:ObjectProperty ;
+    rdfs:label "is detected by thermal camera"@en ;
+    rdfs:comment "Indicates that an entity, heat source, or phenomenon is identified specifically using an infrared or thermal imaging device."@en .
+
+ffonto:usesRadio a owl:ObjectProperty ;
+    rdfs:label "uses radio"@en ;
+    rdfs:comment "Links an entity, vehicle, or responder to the radio communication device, network, or frequency it utilizes."@en .
+
+ffonto:isSystemMonitoredBy a owl:ObjectProperty ;
+    rdfs:label "is system monitored by"@en ;
+    rdfs:comment "Relates an information or operational system to the governing entity, software, or agent responsible for its oversight."@en .
+
+ffonto:issuesEvacuationWarning a owl:ObjectProperty ;
+    rdfs:label "issues evacuation warning"@en ;
+    rdfs:comment "Indicates that an authority, system, or command role broadcasts a notification for civilians to leave a hazardous area."@en .
+
+ffonto:hasEvidence a owl:ObjectProperty ;
+    rdfs:label "has evidence"@en ;
+    rdfs:comment "Connects a conclusion, assessment, or operational claim to the physical, digital, or observational data that supports it."@en .
+
+ffonto:isShelteredFrom a owl:ObjectProperty ;
+    rdfs:label "is sheltered from"@en ;
+    rdfs:comment "Indicates that a population, entity, or facility is protected from a specific hazard, such as a fire or toxic smoke plume."@en .
+
+ffonto:detectedInModel a owl:ObjectProperty ;
+    rdfs:label "detected in model"@en ;
+    rdfs:comment "Links an anomaly, pattern, or simulated event to the specific computational or predictive model in which it was observed."@en .
+
+ffonto:reportsStatisticFor a owl:ObjectProperty ;
+    rdfs:label "reports statistic for"@en ;
+    rdfs:comment "Relates a quantitative data point or statistical document to the specific incident or geographic region it describes."@en .
+
+ffonto:hasFinanceAdministrationSection a owl:ObjectProperty ;
+    rdfs:label "has finance administration section"@en ;
+    rdfs:comment "Links an incident command structure to the organizational unit responsible for tracking costs, time, and financial records."@en .
+
+ffonto:measuredFrom a owl:ObjectProperty ;
+    rdfs:label "measured from"@en ;
+    rdfs:comment "Connects an observation, metric, or distance to the physical location or temporal baseline serving as its starting point."@en .
+
+ffonto:isPredictedByModel a owl:ObjectProperty ;
+    rdfs:label "is predicted by model"@en ;
+    rdfs:comment "Indicates that a forecasted condition, spread rate, or metric is generated by a specific simulation or AI framework."@en .
+
+ffonto:monitorsAirspace a owl:ObjectProperty ;
+    rdfs:label "monitors airspace"@en ;
+    rdfs:comment "Links a system, sensor, or operational agent to the act of observing a designated aerial volume for traffic or hazards."@en .
+
+ffonto:isEventProvenanceRecordOf a owl:ObjectProperty ;
+    rdfs:label "is event provenance record of"@en ;
+    rdfs:comment "Relates a specific trace, log, or documentation file to the historical event or data manipulation process it chronicles."@en .
+
+ffonto:hasImageContribution a owl:ObjectProperty ;
+    rdfs:label "has image contribution"@en ;
+    rdfs:comment "Links a dataset, report, or analytical model to a specific photograph, satellite image, or visual data input that enhances it."@en .
+
+ffonto:hasFireFlank a owl:ObjectProperty ;
+    rdfs:label "has fire flank"@en ;
+    rdfs:comment "Connects a wildfire incident to its lateral boundaries (flanks), relative to the main direction of the fire's spread."@en .
+
+ffonto:recordsDecision a owl:ObjectProperty ;
+    rdfs:label "records decision"@en ;
+    rdfs:comment "Indicates that a log, database, or administrative document captures a specific operational choice or command action."@en .
+
+ffonto:isEvidenceFor a owl:ObjectProperty ;
+    rdfs:label "is evidence for"@en ;
+    rdfs:comment "Links physical data, observations, or provenance records to the hypothesis, risk assessment, or conclusion they validate."@en .
+
+ffonto:hostsSensor a owl:ObjectProperty ;
+    rdfs:label "hosts sensor"@en ;
+    rdfs:comment "Relates a physical platform, such as a weather station, tower, or UAV, to the sensory hardware installed upon it."@en .
+
+ffonto:measuresPollution a owl:ObjectProperty ;
+    rdfs:label "measures pollution"@en ;
+    rdfs:comment "Indicates that a device, system, or observation process quantifies the concentration of contaminants or particulates in the environment."@en .
+
+ffonto:locationOfEvent a owl:ObjectProperty ;
+    rdfs:label "location of event"@en ;
+    rdfs:comment "Connects a specific spatial extent, geographic feature, or coordinate to the incident or phenomenon that occurred there."@en .
+
+ffonto:isMitigatedBy a owl:ObjectProperty ;
+    rdfs:label "is mitigated by"@en ;
+    rdfs:comment "Links a hazard, operational risk, or negative impact to the strategy, action, or device actively used to reduce its severity."@en .
+
+ffonto:improvesIndoorAir a owl:ObjectProperty ;
+    rdfs:label "improves indoor air"@en ;
+    rdfs:comment "Indicates that a mitigation strategy or filtration device specifically targets and enhances the air quality inside a structure."@en .
+
+ffonto:constructedForFire a owl:ObjectProperty ;
+    rdfs:label "constructed for fire"@en ;
+    rdfs:comment "Relates a physical barrier, such as a fireline, or an emergency facility to the specific wildfire incident it was built to manage."@en .
+
+ffonto:influencesFireBehaviorByCharacteristic a owl:ObjectProperty ;
+    rdfs:label "influences fire behavior by characteristic"@en ;
+    rdfs:comment "Links a terrain feature or environmental condition to the specific physical attributes (like slope or density) that alter fire dynamics."@en .
+
+ffonto:mayIgniteOf a owl:ObjectProperty ;
+    rdfs:label "may ignite of"@en ;
+    rdfs:comment "Indicates the potential relationship between a heat source (like an ember) and the specific combustible target material it could set on fire."@en .
+
+ffonto:usedBy a owl:ObjectProperty ;
+    rdfs:label "used by"@en ;
+    rdfs:comment "Connects a resource, tool, tactic, or system to the specific agent, responder, or organization utilizing it."@en .
+
+ffonto:isPlannedByAerialDrop a owl:ObjectProperty ;
+    rdfs:label "is planned by aerial drop"@en ;
+    rdfs:comment "Relates a suppression tactic, resource allocation, or logistical delivery to the coordinated airborne operation executing it."@en .
+
+ffonto:fireSpreadAffectedByEnvironmentalFactor a owl:ObjectProperty ;
+    rdfs:label "fire spread affected by environmental factor"@en ;
+    rdfs:comment "Indicates that the rate or direction of a fire's growth is altered by a specific natural condition, such as wind speed or topography."@en .
+
+ffonto:isObservedBySensor a owl:ObjectProperty ;
+    rdfs:label "is observed by sensor"@en ;
+    rdfs:comment "Links a physical phenomenon, environmental event, or condition to the specific hardware device capturing data about it."@en .
+
+ffonto:usedAsWaterSourceOf a owl:ObjectProperty ;
+    rdfs:label "used as water source of"@en ;
+    rdfs:comment "Connects a natural body of water or municipal supply system to the specific incident or suppression effort drawing from it."@en .
+
+ffonto:isAssessedBy a owl:ObjectProperty ;
+    rdfs:label "is assessed by"@en ;
+    rdfs:comment "Relates a risk level, operational situation, or geographic area to the analytical process, system, or personnel evaluating it."@en .
+
+ffonto:usedInSuppressionOf a owl:ObjectProperty ;
+    rdfs:label "used in suppression of"@en ;
+    rdfs:comment "Links a tactic, resource, or piece of equipment to the specific fire incident it is deployed to contain or extinguish."@en .
+
+ffonto:receivesEDXLMessage a owl:ObjectProperty ;
+    rdfs:label "receives EDXL message"@en ;
+    rdfs:comment "Indicates that a system, agency, or device is configured to accept Emergency Data Exchange Language (EDXL) formatted communications."@en .
+
+ffonto:boundsPrediction a owl:ObjectProperty ;
+    rdfs:label "bounds prediction"@en ;
+    rdfs:comment "Connects a spatial boundary, temporal limit, or mathematical parameter to the forecast or simulation model it constrains."@en .
+
+ffonto:assessesArea a owl:ObjectProperty ;
+    rdfs:label "assesses area"@en ;
+    rdfs:comment "Links an analytical process, human agent, or model to the specific geographic region it is evaluating for risk, damage, or fuel load."@en .
+
+ffonto:producedByFire a owl:ObjectProperty ;
+    rdfs:label "produced by fire"@en ;
+    rdfs:comment "Relates an emission, physical artifact (like ash), or environmental impact to the specific combustion event that created it."@en .
+
+ffonto:causedByPollutant a owl:ObjectProperty ;
+    rdfs:label "caused by pollutant"@en ;
+    rdfs:comment "Indicates that a health impact, environmental degradation, or degraded visibility condition is the direct result of a specific contaminant."@en .
+
+ffonto:meteorologicalVariableAffectsRateOfSpread a owl:ObjectProperty ;
+    rdfs:label "meteorological variable affects rate of spread"@en ;
+    rdfs:comment "Links weather-related data, such as wind velocity or relative humidity, to its direct impact on how rapidly a fire perimeter expands."@en .
+
+ffonto:isUsedBy a owl:ObjectProperty ;
+    rdfs:label "is used by"@en ;
+    rdfs:comment "Connects a piece of equipment, facility, or dataset to the entity, role, or system actively operating or leveraging it."@en .
+
+ffonto:isCombustionAffectedByFuelMoisture a owl:ObjectProperty ;
+    rdfs:label "is combustion affected by fuel moisture"@en ;
+    rdfs:comment "Relates the burning process of a fire to the modulating influence of water content within the available biomass."@en .
+
+ffonto:usedByHelicopter a owl:ObjectProperty ;
+    rdfs:label "used by helicopter"@en ;
+    rdfs:comment "Indicates that a specific suppression resource, tactic, drop zone, or airspace corridor is utilized by rotary-wing aircraft during an operation."@en .
+
+ffonto:observesProperty a owl:ObjectProperty ;
+    rdfs:label "observes property"@en ;
+    rdfs:comment "Links a sensor, platform, or observation act to the specific physical or chemical characteristic it measures."@en .
+
+ffonto:isRiskAssessmentInfluencedByFlammability a owl:ObjectProperty ;
+    rdfs:label "is risk assessment influenced by flammability"@en ;
+    rdfs:comment "Connects a calculated risk level to the specific combustible properties of the fuel load that affect it."@en .
+
+ffonto:isTrackedBy a owl:ObjectProperty ;
+    rdfs:label "is tracked by"@en ;
+    rdfs:comment "Relates an entity, such as an aircraft or resource, to the monitoring system or radar observing its position."@en .
+
+ffonto:requiresEvacuationZone a owl:ObjectProperty ;
+    rdfs:label "requires evacuation zone"@en ;
+    rdfs:comment "Indicates that an incident's severity or location necessitates the establishment of a designated area for civilian removal."@en .
+
+ffonto:partOfIncidentCommandOf a owl:ObjectProperty ;
+    rdfs:label "part of incident command of"@en ;
+    rdfs:comment "Links a role, section, or individual within the Incident Command System to the specific emergency event they are managing."@en .
+
+ffonto:supervisesAircraft a owl:ObjectProperty ;
+    rdfs:label "supervises aircraft"@en ;
+    rdfs:comment "Connects an air tactical group supervisor or air traffic control entity to the aerial assets under their direction."@en .
+
+ffonto:triggeredByAirPollution a owl:ObjectProperty ;
+    rdfs:label "triggered by air pollution"@en ;
+    rdfs:comment "Indicates that a health condition, alert, or mitigation strategy is activated by poor atmospheric quality."@en .
+
+ffonto:partOfFire a owl:ObjectProperty ;
+    rdfs:label "part of fire"@en ;
+    rdfs:comment "Relates a specific zone, such as a flank or head, or a secondary ignition to the primary wildfire incident."@en .
+
+ffonto:tracksAircraft a owl:ObjectProperty ;
+    rdfs:label "tracks aircraft"@en ;
+    rdfs:comment "Links a system, radar, or operational role to the specific aerial vehicle whose flight path is being monitored."@en .
+
+ffonto:isReportedByCitizen a owl:ObjectProperty ;
+    rdfs:label "is reported by citizen"@en ;
+    rdfs:comment "Indicates that an incident, hazard, or observation was submitted by a member of the public rather than an automated system or official responder."@en .
+
+ffonto:analyzesAudioSignal a owl:ObjectProperty ;
+    rdfs:label "analyzes audio signal"@en ;
+    rdfs:comment "Connects a system, AI model, or sensor to the acoustic data it processes to detect anomalies or events."@en .
+
+ffonto:hasTrend a owl:ObjectProperty ;
+    rdfs:label "has trend"@en ;
+    rdfs:comment "Relates a dataset, metric, or phenomenon to the observable directional change or pattern over time."@en .
+
+ffonto:hasDebrisFlowRisk a owl:ObjectProperty ;
+    rdfs:label "has debris flow risk"@en ;
+    rdfs:comment "Indicates the potential for mudslides or rockfalls in a specific area, often following severe wildfire burn damage to the landscape."@en .
+
+ffonto:providesTrackingData a owl:ObjectProperty ;
+    rdfs:label "provides tracking data"@en ;
+    rdfs:comment "Links a sensor, GPS device, or system to the continuous location and movement telemetry it generates."@en .
+
+ffonto:isAffectedByAnomaly a owl:ObjectProperty ;
+    rdfs:label "is affected by anomaly"@en ;
+    rdfs:comment "Connects a system, dataset, or operational baseline to an unexpected deviation or irregular event impacting it."@en .
+
+ffonto:hasPredictionUncertainty a owl:ObjectProperty ;
+    rdfs:label "has prediction uncertainty"@en ;
+    rdfs:comment "Relates a forecasted value or model output to its calculated margin of error or statistical confidence interval."@en .
+
+ffonto:mayIgnite a owl:ObjectProperty ;
+    rdfs:label "may ignite"@en ;
+    rdfs:comment "Indicates the potential for a specific material, fuel load, or area to catch fire under the current environmental conditions."@en .
+
+ffonto:followedByAircraft a owl:ObjectProperty ;
+    rdfs:label "followed by aircraft"@en ;
+    rdfs:comment "Links a designated flight path, lead plane, or operational tactic to the aerial asset executing or tailing it."@en .
+
+ffonto:usedForFlight a owl:ObjectProperty ;
+    rdfs:label "used for flight"@en ;
+    rdfs:comment "Connects a specific airspace corridor, resource, or meteorological dataset to its application in aviation operations."@en .
+
+ffonto:occursAtLocation a owl:ObjectProperty ;
+    rdfs:label "occurs at location"@en ;
+    rdfs:comment "Relates an incident, observation, or action to the specific geospatial coordinates or boundary area where it takes place."@en .
+
+ffonto:affectsHealth a owl:ObjectProperty ;
+    rdfs:label "affects health"@en ;
+    rdfs:comment "Indicates that an environmental condition, event, or pollutant has a measurable impact on the physical well-being of a population."@en .
+
+ffonto:limitsFireSpread a owl:ObjectProperty ;
+    rdfs:label "limits fire spread"@en ;
+    rdfs:comment "Links a physical barrier, mitigation tactic, or environmental feature to its restricting effect on a fire's expansion."@en .
+
+ffonto:definesPerimeter a owl:ObjectProperty ;
+    rdfs:label "defines perimeter"@en ;
+    rdfs:comment "Connects a set of geospatial coordinates, a containment line, or an observation to the established geographic boundary of a fire."@en .
+
+ffonto:isMeasuredByAQI a owl:ObjectProperty ;
+    rdfs:label "is measured by AQI"@en ;
+    rdfs:comment "Indicates that the concentration of atmospheric pollutants or general air quality is quantified using the standard Air Quality Index."@en .
+
+ffonto:hasAirConditioner a owl:ObjectProperty ;
+    rdfs:label "has air conditioner"@en ;
+    rdfs:comment "Relates a facility or sheltered environment to the HVAC system used to regulate its temperature and indoor air quality."@en .
+
+ffonto:isProtectedBy a owl:ObjectProperty ;
+    rdfs:label "is protected by"@en ;
+    rdfs:comment "Links a vulnerable entity, community, or system to the specific plan, physical barrier, or policy ensuring its safety."@en .
+
+ffonto:causedByBurnSeverity a owl:ObjectProperty ;
+    rdfs:label "caused by burn severity"@en ;
+    rdfs:comment "Indicates that a secondary effect, such as soil degradation or debris flow, is a direct result of the intense heat damage from a fire."@en .
+
+ffonto:classifiesVisibility a owl:ObjectProperty ;
+    rdfs:label "classifies visibility"@en ;
+    rdfs:comment "Connects an observation, sensor, or metric to the categorization of visual range through the atmosphere, which is often degraded by smoke."@en .
+
+ffonto:isFireBehaviorModelInfluencedByWeather a owl:ObjectProperty ;
+    rdfs:label "is fire behavior model influenced by weather"@en ;
+    rdfs:comment "Relates a predictive fire simulation to the meteorological data inputs that shape its calculations."@en .
+
+ffonto:updatesModel a owl:ObjectProperty ;
+    rdfs:label "updates model"@en ;
+    rdfs:comment "Links incoming data, a revision process, or an observer to the computational model being refined with new information."@en .
+
+ffonto:hasEventProvenanceRecord a owl:ObjectProperty ;
+    rdfs:label "has event provenance record"@en ;
+    rdfs:comment "Connects an incident, dataset, or decision to the historical log that documents its origin, timeline, and alterations."@en .
+
+ffonto:hasTemporalExtent a owl:ObjectProperty ;
+    rdfs:label "has temporal extent"@en ;
+    rdfs:comment "Relates an event, phenomenon, or operation to the specific time interval or exact duration during which it occurs."@en .
+
+ffonto:providesResourcesFor a owl:ObjectProperty ;
+    rdfs:label "provides resources for"@en ;
+    rdfs:comment "Links an organization, logistics hub, or mutual aid agreement to the specific incident or operation it supplies."@en .
+
+ffonto:plansAerialDrop a owl:ObjectProperty ;
+    rdfs:label "plans aerial drop"@en ;
+    rdfs:comment "Connects an operational strategy or command role to the scheduled deployment of retardant or water from an aircraft."@en .
+
+ffonto:indicatesCombustion a owl:ObjectProperty ;
+    rdfs:label "indicates combustion"@en ;
+    rdfs:comment "Relates a chemical, thermal, or visual signature to the active presence of burning material."@en .
+
+ffonto:representsPhysicalSystem a owl:ObjectProperty ;
+    rdfs:label "represents physical system"@en ;
+    rdfs:comment "Links a digital twin, simulation, or data model to the real-world environment or infrastructure it emulates."@en .
+
+ffonto:predictsSmokePlumeOf a owl:ObjectProperty ;
+    rdfs:label "predicts smoke plume of"@en ;
+    rdfs:comment "Connects a computational model or forecast to the specific wildfire whose particulate emissions and dispersion it estimates."@en .
+
+ffonto:isCombinedInForecast a owl:ObjectProperty ;
+    rdfs:label "is combined in forecast"@en ;
+    rdfs:comment "Indicates that a specific dataset, meteorological variable, or individual model is integrated into a larger synthesized prediction."@en .
+
+ffonto:rateOfSpreadAffectedByMeteorologicalVariable a owl:ObjectProperty ;
+    rdfs:label "rate of spread affected by meteorological variable"@en ;
+    rdfs:comment "Relates the speed of fire growth to the specific weather conditions, such as wind or humidity, influencing its acceleration."@en .
+
+ffonto:affectsHealthCondition a owl:ObjectProperty ;
+    rdfs:label "affects health condition"@en ;
+    rdfs:comment "Links an environmental hazard, like smoke or extreme heat, to its impact on a specific pre-existing medical issue or physiological state."@en .
+
+ffonto:measuredOf a owl:ObjectProperty ;
+    rdfs:label "measured of"@en ;
+    rdfs:comment "Relates a recorded value, statistic, or qualitative observation back to the specific entity, area, or phenomenon that was analyzed."@en .
+
+ffonto:protectsAgainst a owl:ObjectProperty ;
+    rdfs:label "protects against"@en ;
+    rdfs:comment "Indicates the specific hazard, threat, or condition that an entity, policy, or mitigation strategy defends against."@en .
+
+ffonto:detectedModelOf a owl:ObjectProperty ;
+    rdfs:label "detected model of"@en ;
+    rdfs:comment "Links a recognized pattern, anomaly, or simulation output back to the specific computational model that generated it."@en .
+
+ffonto:chemicalComponentAffectsCombustion a owl:ObjectProperty ;
+    rdfs:label "chemical component affects combustion"@en ;
+    rdfs:comment "Relates the chemical composition of a fuel source to how it influences the burning process and fire intensity."@en .
+
+ffonto:healthAffectedByPM25 a owl:ObjectProperty ;
+    rdfs:label "health affected by PM2.5"@en ;
+    rdfs:comment "Indicates that a specific medical condition or public health metric is impacted by fine particulate matter (PM2.5) exposure."@en .
+
+ffonto:managesIncident a owl:ObjectProperty ;
+    rdfs:label "manages incident"@en ;
+    rdfs:comment "Connects an incident command role, organization, or system to the specific emergency event it oversees."@en .
+
+ffonto:consumesFuel a owl:ObjectProperty ;
+    rdfs:label "consumes fuel"@en ;
+    rdfs:comment "Relates a combustion event, such as a wildfire or engine, to the physical biomass or energy source it depletes."@en .
+
+ffonto:produces a owl:ObjectProperty ;
+    rdfs:label "produces"@en ;
+    rdfs:comment "A general relation indicating that an entity, event, or process generates a specific output, emission, or artifact."@en .
+
+ffonto:isStructureFireSuppressedBy a owl:ObjectProperty ;
+    rdfs:label "is structure fire suppressed by"@en ;
+    rdfs:comment "Links a burning building or facility to the specific tactic, resource, or system actively extinguishing it."@en .
+
+ffonto:providesProtectionFromSmoke a owl:ObjectProperty ;
+    rdfs:label "provides protection from smoke"@en ;
+    rdfs:comment "Indicates that a device, shelter, or policy shields individuals or equipment from the harmful effects of airborne particulate matter."@en .
+
+ffonto:operatesUnderBVLOS a owl:ObjectProperty ;
+    rdfs:label "operates under BVLOS"@en ;
+    rdfs:comment "Connects a UAV or aerial mission to the regulatory and operational framework of Beyond Visual Line of Sight flight."@en .
+
+ffonto:affectsClimatePattern a owl:ObjectProperty ;
+    rdfs:label "affects climate pattern"@en ;
+    rdfs:comment "Relates a large-scale environmental event or continuous emission to its altering effect on long-term weather and atmospheric trends."@en .
+
+ffonto:isExplainedBy a owl:ObjectProperty ;
+    rdfs:label "is explained by"@en ;
+    rdfs:comment "Links an observation, anomaly, or model prediction to the underlying rationale, data, or theory that justifies it."@en .
+
+ffonto:receivesTrackingFrom a owl:ObjectProperty ;
+    rdfs:label "receives tracking from"@en ;
+    rdfs:comment "Indicates that a system, command center, or entity gets location telemetry from a specific sensor or monitoring device."@en .
+
+ffonto:isRecordedInInventory a owl:ObjectProperty ;
+    rdfs:label "is recorded in inventory"@en ;
+    rdfs:comment "Connects a physical resource, equipment, or supply to the logistical database or ledger that tracks its availability."@en .
+
+ffonto:isBriefedBy a owl:ObjectProperty ;
+    rdfs:label "is briefed by"@en ;
+    rdfs:comment "Relates an incident, operational period, or responder to the specific role or document providing status updates and situational awareness."@en .
+
+ffonto:reducesFireRisk a owl:ObjectProperty ;
+    rdfs:label "reduces fire risk"@en ;
+    rdfs:comment "Indicates that a specific mitigation strategy, environmental change, or policy lowers the probability of fire ignition or spread."@en .
+
+ffonto:describesTrendOf a owl:ObjectProperty ;
+    rdfs:label "describes trend of"@en ;
+    rdfs:comment "Links a statistical analysis, graph, or temporal dataset to the specific phenomenon or variable whose changes it maps over time."@en .
+
+ffonto:causedByBurnSeverityOf a owl:ObjectProperty ;
+    rdfs:label "caused by burn severity of"@en ;
+    rdfs:comment "Connects a secondary environmental consequence (like soil erosion) to the specific intense heat damage of a designated fire."@en .
+
+ffonto:validatesData a owl:ObjectProperty ;
+    rdfs:label "validates data"@en ;
+    rdfs:comment "Indicates that a process, algorithm, or authority checks and confirms the accuracy or integrity of a specific dataset."@en .
+
+ffonto:isIntegratedIntoKG a owl:ObjectProperty ;
+    rdfs:label "is integrated into KG"@en ;
+    rdfs:comment "Relates a discrete dataset, entity, or document to the encompassing Knowledge Graph where it is semantically linked."@en .
+
+ffonto:reportedThroughOf a owl:ObjectProperty ;
+    rdfs:label "reported through of"@en ;
+    rdfs:comment "Links a communication channel or system back to the specific report, alert, or data stream it transmitted."@en .
+
+ffonto:hasSpatialExtent a owl:ObjectProperty ;
+    rdfs:label "has spatial extent"@en ;
+    rdfs:comment "Connects an incident, phenomenon, or entity to its physical boundaries, area, or geospatial footprint."@en .
+
+ffonto:affectsHealthOf a owl:ObjectProperty ;
+    rdfs:label "affects health of"@en ;
+    rdfs:comment "Indicates the specific population, individual, or demographic whose medical well-being is impacted by a hazard."@en .
+
+ffonto:triggeredBySmoke a owl:ObjectProperty ;
+    rdfs:label "triggered by smoke"@en ;
+    rdfs:comment "Relates an alert, health symptom, or automated response to the presence of airborne combustion particulates."@en .
+
+ffonto:predictsFireSpread a owl:ObjectProperty ;
+    rdfs:label "predicts fire spread"@en ;
+    rdfs:comment "Links a computational model, simulation, or analytical process to its forecast of how a fire perimeter will expand."@en .
+
+ffonto:verifiesReport a owl:ObjectProperty ;
+    rdfs:label "verifies report"@en ;
+    rdfs:comment "Indicates that a designated authority, secondary sensor, or validation process confirms the details of an incident log or alert."@en .
+
+ffonto:allocatesResourceOf a owl:ObjectProperty ;
+    rdfs:label "allocates resource of"@en ;
+    rdfs:comment "Connects an assignment action or logistical plan to the specific equipment, personnel, or funds being distributed."@en .
+
+ffonto:supportsDecision a owl:ObjectProperty ;
+    rdfs:label "supports decision"@en ;
+    rdfs:comment "Links analytical data, a DSS (Decision Support System), or an observation to the operational command choice it informs."@en .
+
+ffonto:hasRateOfSpread a owl:ObjectProperty ;
+    rdfs:label "has rate of spread"@en ;
+    rdfs:comment "Relates a fire incident or moving phenomenon to the quantitative metric describing its speed of expansion."@en .
+
+ffonto:isWildlifeAffectedByImpact a owl:ObjectProperty ;
+    rdfs:label "is wildlife affected by impact"@en ;
+    rdfs:comment "Connects local animal populations or habitats to the specific environmental damage or event disrupting them."@en .
+
+ffonto:predictsSmokePlume a owl:ObjectProperty ;
+    rdfs:label "predicts smoke plume"@en ;
+    rdfs:comment "Links a simulation or meteorological model to its forecast of the trajectory and density of particulate emissions."@en .
+
+ffonto:filtersAirInShelter a owl:ObjectProperty ;
+    rdfs:label "filters air in shelter"@en ;
+    rdfs:comment "Indicates that a mitigation device or HVAC system actively cleans the indoor atmosphere of a designated safe facility."@en .
+
+ffonto:derivedFromFire a owl:ObjectProperty ;
+    rdfs:label "derived from fire"@en ;
+    rdfs:comment "Connects data, emissions, impacts, or statistics back to the specific combustion event that generated them."@en .
+
+ffonto:releasedDuringFire a owl:ObjectProperty ;
+    rdfs:label "released during fire"@en ;
+    rdfs:comment "Relates a specific emission, such as carbon dioxide or PM2.5, to the active wildfire incident that emitted it."@en .
+
+ffonto:isManagedBy a owl:ObjectProperty ;
+    rdfs:label "is managed by"@en ;
+    rdfs:comment "Links an incident, resource, or system to the specific command role, organization, or software responsible for its oversight."@en .
+
+ffonto:preparedForZone a owl:ObjectProperty ;
+    rdfs:label "prepared for zone"@en ;
+    rdfs:comment "Connects a mitigation plan, resource cache, or community strategy to the specific geographic area it is designed to protect."@en .
+
+ffonto:isAffectedByEvapotranspiration a owl:ObjectProperty ;
+    rdfs:label "is affected by evapotranspiration"@en ;
+    rdfs:comment "Indicates that fuel moisture, fire behavior, or local climate is influenced by the transfer of water from land and plants to the atmosphere."@en .
+
+ffonto:estimatedFrom a owl:ObjectProperty ;
+    rdfs:label "estimated from"@en ;
+    rdfs:comment "Relates a calculated metric or forecast to the specific baseline data, proxy, or model used to derive it."@en .
+
+ffonto:hasConfidenceScore a owl:ObjectProperty ;
+    rdfs:label "has confidence score"@en ;
+    rdfs:comment "Links a prediction, analytical finding, or AI model output to the statistical probability or certainty metric associated with it."@en .
+
+ffonto:partOfWildfire a owl:ObjectProperty ;
+    rdfs:label "part of wildfire"@en ;
+    rdfs:comment "Connects a distinct spatial zone (like a flank or spot fire) or temporal phase to the overarching natural fire incident."@en .
+
+ffonto:affectsForestAreaOf a owl:ObjectProperty ;
+    rdfs:label "affects forest area of"@en ;
+    rdfs:comment "Indicates that an event or policy impacts a specific wooded region belonging to a broader geographic or administrative boundary."@en .
+
+ffonto:generatesAlert a owl:ObjectProperty ;
+    rdfs:label "generates alert"@en ;
+    rdfs:comment "Links a sensor, predictive model, or monitoring system to the warning notification it produces in response to a threshold breach."@en .
+
+ffonto:managesAirspace a owl:ObjectProperty ;
+    rdfs:label "manages airspace"@en ;
+    rdfs:comment "Relates an air traffic control entity, tactical supervisor, or system to the designated flight zone it regulates."@en .
+
+sosa:isHostedBy a owl:ObjectProperty ;
+    rdfs:label "is hosted by"@en ;
+    rdfs:comment "Relation between a Sensor, Actuator, Sampler, or Platform, and the Platform that it is mounted on or hosted by."@en .
+
+ffonto:generatesAlertOf a owl:ObjectProperty ;
+    rdfs:label "generates alert of"@en ;
+    rdfs:comment "Connects an automated warning or notification back to the specific system, sensor, or threshold that triggered it."@en .
+
+ffonto:isReportedIn a owl:ObjectProperty ;
+    rdfs:label "is reported in"@en ;
+    rdfs:comment "Links an event, observation, or metric to the specific document, database, or official log where it is recorded."@en .
+
+ffonto:locatedfireOf a owl:ObjectProperty ;
+    rdfs:label "located fire of"@en ;
+    rdfs:comment "Connects a geospatial coordinate, containment zone, or geographical feature to the specific fire incident burning there."@en .
+
+ffonto:isAnalyzedTemporally a owl:ObjectProperty ;
+    rdfs:label "is analyzed temporally"@en ;
+    rdfs:comment "Indicates that a dataset, event sequence, or phenomenon is examined based on its chronological patterns and time-based progression."@en .
+
+ffonto:hasVisibilityCategory a owl:ObjectProperty ;
+    rdfs:label "has visibility category"@en ;
+    rdfs:comment "Relates an atmospheric observation or geographic area to a standardized classification of visual range, often degraded by smoke."@en .
+
+ffonto:explainsModelPrediction a owl:ObjectProperty ;
+    rdfs:label "explains model prediction"@en ;
+    rdfs:comment "Links a set of input features, rationale, or Explainable AI (XAI) output to the specific forecast it clarifies."@en .
+
+ffonto:isPerimeterOf a owl:ObjectProperty ;
+    rdfs:label "is perimeter of"@en ;
+    rdfs:comment "Connects a defined containment line or geospatial boundary to the specific wildfire incident it encloses."@en .
+
+ffonto:hasFireFront a owl:ObjectProperty ;
+    rdfs:label "has fire front"@en ;
+    rdfs:comment "Relates a wildfire incident to its most active, rapidly advancing boundary of combustion."@en .
+
+ffonto:isFireBehaviorInfluencedByFuel a owl:ObjectProperty ;
+    rdfs:label "is fire behavior influenced by fuel"@en ;
+    rdfs:comment "Indicates that the spread and intensity of a fire are directly modulated by the type, density, and condition of available biomass."@en .
+
+ffonto:isContainedByFireLine a owl:ObjectProperty ;
+    rdfs:label "is contained by fire line"@en ;
+    rdfs:comment "Links a fire incident or advancing front to the physical barrier constructed or utilized to stop its spread."@en .
+
+ffonto:describesSpreadOf a owl:ObjectProperty ;
+    rdfs:label "describes spread of"@en ;
+    rdfs:comment "Connects a metric, temporal analysis, or model to the specific fire or phenomenon whose expansion it tracks."@en .
+
+ffonto:causesCardiacIssue a owl:ObjectProperty ;
+    rdfs:label "causes cardiac issue"@en ;
+    rdfs:comment "Indicates that exposure to a hazard, such as severe air pollution or extreme stress, induces heart-related medical emergencies."@en .
+
+ffonto:hasFireEngine a owl:ObjectProperty ;
+    rdfs:label "has fire engine"@en ;
+    rdfs:comment "Relates a firefighting organization, station, or incident response plan to the specific vehicular apparatus it deploys."@en .
+
+ffonto:hasFireRegime a owl:ObjectProperty ;
+    rdfs:label "has fire regime"@en ;
+    rdfs:comment "Links a specific ecosystem or geographic region to its historical pattern of fire frequency, seasonality, and intensity."@en .
+
+ffonto:limitsFireSpreadOf a owl:ObjectProperty ;
+    rdfs:label "limits fire spread of"@en ;
+    rdfs:comment "Connects a physical barrier, weather event, or suppression tactic to the specific wildfire whose expansion it hinders."@en .
+
+ffonto:isEvacuationOrderFor a owl:ObjectProperty ;
+    rdfs:label "is evacuation order for"@en ;
+    rdfs:comment "Relates an official mandate to leave an area to the specific incident or hazard that necessitated it."@en .
+
+ffonto:respondsToIncident a owl:ObjectProperty ;
+    rdfs:label "responds to incident"@en ;
+    rdfs:comment "Links an emergency responder, vehicle, or operational unit to the specific crisis event they are assigned to manage."@en .
+
+ffonto:occursInAirspace a owl:ObjectProperty ;
+    rdfs:label "occurs in airspace"@en ;
+    rdfs:comment "Indicates that an aerial operation, flight path, or meteorological event takes place within a designated volumetric flight zone."@en .
+
+ffonto:providesImageFor a owl:ObjectProperty ;
+    rdfs:label "provides image for"@en ;
+    rdfs:comment "Connects a camera, satellite, or visual dataset to the specific analysis, report, or system that utilizes its imagery."@en .
+
+ffonto:usedInSuppression a owl:ObjectProperty ;
+    rdfs:label "used in suppression"@en ;
+    rdfs:comment "Relates a tactic, resource, or chemical retardant to its active application in extinguishing or controlling a fire."@en .
+
+ffonto:updatesModelOf a owl:ObjectProperty ;
+    rdfs:label "updates model of"@en ;
+    rdfs:comment "Links incoming data, observed conditions, or human feedback to the specific predictive algorithm or simulation it refines."@en .
+
+ffonto:isSupervisedByAirAttack a owl:ObjectProperty ;
+    rdfs:label "is supervised by air attack"@en ;
+    rdfs:comment "Indicates that an aerial suppression operation or airspace zone is directed by an airborne tactical supervisor (Air Attack)."@en .
+
+ffonto:collectsSatelliteData a owl:ObjectProperty ;
+    rdfs:label "collects satellite data"@en ;
+    rdfs:comment "Relates a system, organization, or orbital platform to the act of gathering remote sensing imagery or telemetry."@en .
+
+ffonto:landsAtHelispot a owl:ObjectProperty ;
+    rdfs:label "lands at helispot"@en ;
+    rdfs:comment "Connects a rotary-wing aircraft or aerial mission to the designated temporary landing zone used during an incident."@en .
+
+ffonto:protectsData a owl:ObjectProperty ;
+    rdfs:label "protects data"@en ;
+    rdfs:comment "Indicates that a cybersecurity protocol, privacy policy, or governance framework secures a specific information asset."@en .
+
+ffonto:evaluatesRiskOf a owl:ObjectProperty ;
+    rdfs:label "evaluates risk of"@en ;
+    rdfs:comment "Links a risk assessment process, model, or analyst to the specific hazard, operational plan, or geographic area being scrutinized."@en .
+
+ffonto:analyzesTemporalData a owl:ObjectProperty ;
+    rdfs:label "analyzes temporal data"@en ;
+    rdfs:comment "Connects a system, algorithm, or process to its function of examining time-series information for trends or anomalies."@en .
+
+ffonto:managesIncidentOf a owl:ObjectProperty ;
+    rdfs:label "manages incident of"@en ;
+    rdfs:comment "Relates a command structure, software platform, or administrative section to the specific emergency event it controls."@en .
+
+ffonto:usedByResponder a owl:ObjectProperty ;
+    rdfs:label "used by responder"@en ;
+    rdfs:comment "Links a piece of equipment, communication device, or tactic to the specific emergency personnel utilizing it."@en .
+
+ffonto:indicatesMoistureCondition a owl:ObjectProperty ;
+    rdfs:label "indicates moisture condition"@en ;
+    rdfs:comment "Connects a sensor reading, weather metric, or index to the physical hydration state of vegetation or soil."@en .
+
+ffonto:hasSoilMoistureIndex a owl:ObjectProperty ;
+    rdfs:label "has soil moisture index"@en ;
+    rdfs:comment "Relates a geographic region or environmental dataset to a quantifiable metric representing the water content in the ground."@en .
+
+ffonto:isFireFrontSuppressedBy a owl:ObjectProperty ;
+    rdfs:label "is fire front suppressed by"@en ;
+    rdfs:comment "Indicates that the most actively burning edge of a fire is being engaged and mitigated by a specific tactic or resource."@en .
+
+ffonto:hasPredictiveInterval a owl:ObjectProperty ;
+    rdfs:label "has predictive interval"@en ;
+    rdfs:comment "Links a forecasted value or simulation model to the specific time horizon (e.g., 24 hours, 7 days) it projects."@en .
+
+ffonto:restrictsAccessTo a owl:ObjectProperty ;
+    rdfs:label "restricts access to"@en ;
+    rdfs:comment "Connects an authority, policy, or hazard to the specific physical location or digital system it prevents entry into."@en .
+
+ffonto:isCombustionAffectedByChemicalComponent a owl:ObjectProperty ;
+    rdfs:label "is combustion affected by chemical component"@en ;
+    rdfs:comment "Indicates that the burning characteristics of a fuel are modulated by its specific chemical makeup, such as volatile oils."@en .
+
+ffonto:isAnalyzedByAudio a owl:ObjectProperty ;
+    rdfs:label "is analyzed by audio"@en ;
+    rdfs:comment "Relates an event, operational environment, or mechanical system to the acoustic processing techniques used to monitor it."@en .
+
+ffonto:monitorsSystem a owl:ObjectProperty ;
+    rdfs:label "monitors system"@en ;
+    rdfs:comment "Links an oversight framework, human agent, or diagnostic software to the specific operational or IT system it observes."@en .
+
+ffonto:isConsumedIn a owl:ObjectProperty ;
+    rdfs:label "is consumed in"@en ;
+    rdfs:comment "Connects a resource, such as water, retardant, or fuel, to the specific incident or operational process that depletes it."@en .
+
+ffonto:characterizesRegion a owl:ObjectProperty ;
+    rdfs:label "characterizes region"@en ;
+    rdfs:comment "Relates a demographic statistic, environmental baseline, or climate regime to the specific geographic area it describes."@en .
+
+ffonto:hasSite a owl:DatatypeProperty ;
+    rdfs:label "has site"@en ;
+    rdfs:comment "Relates an organization, incident, or operation to a specific physical facility, encampment, or designated location."@en .
+
+ffonto:hasRegion a owl:DatatypeProperty ;
+    rdfs:label "has region"@en ;
+    rdfs:comment "Links an entity, incident, or geographic coordinate to the broader administrative or environmental territory it resides within."@en .
+
+ffonto:hasDate a owl:DatatypeProperty ;
+    rdfs:label "has date"@en ;
+    rdfs:comment "Links an event, document, or observation to the specific calendar date on which it occurred or was recorded."@en .
+
+ffonto:hasYear a owl:DatatypeProperty ;
+    rdfs:label "has year"@en ;
+    rdfs:comment "Connects a temporal entity or historical record to its corresponding calendar year."@en .
+
+ffonto:hasMonth a owl:DatatypeProperty ;
+    rdfs:label "has month"@en ;
+    rdfs:comment "Relates a temporal entity, statistical aggregate, or event to the specific month of the year it belongs to."@en .
+
+ffonto:modelName a owl:DatatypeProperty ;
+    rdfs:label "model name"@en ;
+    rdfs:comment "Specifies the formal, human-readable designation or title of a computational, predictive, or AI model."@en .
+
+ffonto:modelVersion a owl:DatatypeProperty ;
+    rdfs:label "model version"@en ;
+    rdfs:comment "Indicates the specific iteration, release number, or update stage of a software or analytical model."@en .
+
+ffonto:hasCountry a owl:DatatypeProperty ;
+    rdfs:label "has country"@en ;
+    rdfs:comment "Links a geographic location, incident, or administrative entity to its sovereign national boundary."@en .
+
+ffonto:zshotModel a owl:DatatypeProperty ;
+    rdfs:label "zero-shot model"@en ;
+    rdfs:comment "Relates an analytical process or system to the specific zero-shot learning AI model utilized for classification or prediction."@en .
+
+ffonto:hasDayName a owl:DatatypeProperty ;
+    rdfs:label "has day name"@en ;
+    rdfs:comment "Connects a temporal record or scheduled event to the specific day of the week (e.g., Monday, Tuesday)."@en .
+
+ffonto:hasDateTime a owl:DatatypeProperty ;
+    rdfs:label "has date time"@en ;
+    rdfs:comment "Links an event, observation, or log entry to an exact timestamp combining both date and time of day."@en .
+
+ffonto:hasDay a owl:DatatypeProperty ;
+    rdfs:label "has day"@en ;
+    rdfs:comment "Connects a temporal entity or recorded event to the specific numerical day of the month."@en .
+
+ffonto:ForestFireEffect a owl:Class ;
+    rdfs:label "forest fire effect"@en ;
+    rdfs:comment "Represents the ecological, environmental, or economic consequence resulting from a wildfire, such as soil erosion or habitat loss."@en .
+
+ffonto:isModelOf a owl:ObjectProperty ;
+    rdfs:label "is model of"@en ;
+    rdfs:comment "Links a computational, mathematical, or physical model back to the real-world phenomenon or system it simulates."@en .
+
+ffonto:deploysFireTruckOf a owl:ObjectProperty ;
+    rdfs:label "deploys fire truck of"@en ;
+    rdfs:comment "Connects a dispatch action or operational decision back to the specific fire engine resource mobilized."@en .
+
+ffonto:usesTechnologyOf a owl:ObjectProperty ;
+    rdfs:label "uses technology of"@en ;
+    rdfs:comment "Relates a specific technological system or device back to the operational process or organization utilizing it."@en .
+
+ffonto:isSpottingEventOf a owl:ObjectProperty ;
+    rdfs:label "is spotting event of"@en ;
+    rdfs:comment "Links a secondary ignition caused by flying embers back to the primary wildfire incident."@en .
+
+ffonto:implementsPSPSOf a owl:ObjectProperty ;
+    rdfs:label "implements PSPS of"@en ;
+    rdfs:comment "Connects an executed Public Safety Power Shutoff (PSPS) event back to the utility policy or hazard mitigation plan that required it."@en .
+
+ffonto:hasVisionModelScores a owl:ObjectProperty ;
+    rdfs:label "has vision model scores"@en ;
+    rdfs:comment "Links an image, video frame, or visual dataset to the quantitative confidence scores generated by a computer vision model."@en .
+
+ffonto:burningVegetationOf a owl:ObjectProperty ;
+    rdfs:label "burning vegetation of"@en ;
+    rdfs:comment "Relates an area of actively combusting plant matter to the broader geographic region or wildfire incident."@en .
+
+ffonto:hasModelProvenance a owl:ObjectProperty ;
+    rdfs:label "has model provenance"@en ;
+    rdfs:comment "Connects a predictive model or AI output to the documentation detailing its training data, versioning, and lineage."@en .
+
+ffonto:isMediaAssetOf a owl:ObjectProperty ;
+    rdfs:label "is media asset of"@en ;
+    rdfs:comment "Links a photograph, video, or audio recording to the specific incident, database, or report it illustrates."@en .
+
+ffonto:heavyEquipmentInUseOf a owl:ObjectProperty ;
+    rdfs:label "heavy equipment in use of"@en ;
+    rdfs:comment "Connects bulldozers, graders, or other large machinery back to the suppression operation or construction task utilizing them."@en .
+
+ffonto:affectsAviationRouteOf a owl:ObjectProperty ;
+    rdfs:label "affects aviation route of"@en ;
+    rdfs:comment "Links a smoke plume, Temporary Flight Restriction (TFR), or hazard back to the specific flight corridor it disrupts."@en .
+
+ffonto:isAlertStatusOf a owl:ObjectProperty ;
+    rdfs:label "is alert status of"@en ;
+    rdfs:comment "Connects a specific warning level or notification state to the hazard, operational system, or community it applies to."@en .
+
+ffonto:crossedWatershedOf a owl:ObjectProperty ;
+    rdfs:label "crossed watershed of"@en ;
+    rdfs:comment "Relates a fire's progression or environmental impact back to the specific hydrological boundary it breached."@en .
+
+ffonto:isGroundCrewOf a owl:ObjectProperty ;
+    rdfs:label "is ground crew of"@en ;
+    rdfs:comment "Links a handcrew, engine module, or suppression team to the incident, division, or agency they are assigned to."@en .
+
+ffonto:isEcologicalEffectOf a owl:ObjectProperty ;
+    rdfs:label "is ecological effect of"@en ;
+    rdfs:comment "Connects a biological or environmental impact (like habitat loss) back to the specific natural disaster that caused it."@en .
+
+ffonto:isICSFunctionOf a owl:ObjectProperty ;
+    rdfs:label "is ICS function of"@en ;
+    rdfs:comment "Relates a specific role, section, or operational task back to the Incident Command System structure governing it."@en .
+
+ffonto:isModelProvenanceOf a owl:ObjectProperty ;
+    rdfs:label "is model provenance of"@en ;
+    rdfs:comment "Links a lineage record, training dataset log, or version history back to the specific computational model it documents."@en .
+
+ffonto:locatedInWUIOf a owl:ObjectProperty ;
+    rdfs:label "located in WUI of"@en ;
+    rdfs:comment "Connects a structure, incident, or operation to the specific Wildland-Urban Interface zone where human development meets natural terrain."@en .
+
+ffonto:aircraftActionOf a owl:ObjectProperty ;
+    rdfs:label "aircraft action of"@en ;
+    rdfs:comment "Links a specific aerial maneuver, drop, or reconnaissance flight back to the broader aviation operation or incident strategy."@en .
+
+ffonto:stagedNearOf a owl:ObjectProperty ;
+    rdfs:label "staged near of"@en ;
+    rdfs:comment "Connects a deployed resource, equipment cache, or staging area back to the geographic feature or incident it is positioned for."@en .
+
+ffonto:hasProvenanceRecord a owl:ObjectProperty ;
+    rdfs:label "has provenance record"@en ;
+    rdfs:comment "Links a dataset, physical sample, or analytical conclusion to the detailed historical log of its origin and chain of custody."@en .
+
+ffonto:usedModel a owl:ObjectProperty ;
+    rdfs:label "used model"@en ;
+    rdfs:comment "Relates a forecast, analysis, or decision process to the specific simulation, mathematical framework, or AI deployed to generate it."@en .
+
+ffonto:performsTaskOf a owl:ObjectProperty ;
+    rdfs:label "performs task of"@en ;
+    rdfs:comment "Connects a specific action, duty, or assignment back to the operational role, team, or agent executing it."@en .
+
+ffonto:usesDetectionMethodOf a owl:ObjectProperty ;
+    rdfs:label "uses detection method of"@en ;
+    rdfs:comment "Links a specific sensor technology, analytical technique, or human observation protocol back to the early warning system relying on it."@en .
+
+ffonto:computesEvacuationRouteOf a owl:ObjectProperty ;
+    rdfs:label "computes evacuation route of"@en ;
+    rdfs:comment "Connects a generated escape path or traffic model back to the spatial analysis software or incident action plan that created it."@en .
+
+ffonto:isResultOf a owl:ObjectProperty ;
+    rdfs:label "is result of"@en ;
+    rdfs:comment "Links an outcome, physical effect, or analytical output back to the specific event, process, or calculation that produced it."@en .
+
+ffonto:isImpactHazardOf a owl:ObjectProperty ;
+    rdfs:label "is impact hazard of"@en ;
+    rdfs:comment "Connects a specific danger, such as a falling tree or debris flow, back to the destabilizing event or environment that created the risk."@en .
+
+ffonto:reachedAgriculturalLandOf a owl:ObjectProperty ;
+    rdfs:label "reached agricultural land of"@en ;
+    rdfs:comment "Relates the expanding perimeter of a fire or environmental hazard back to the specific farming or pastoral region it encroached upon."@en .
+
+ffonto:impactsTransportationOf a owl:ObjectProperty ;
+    rdfs:label "impacts transportation of"@en ;
+    rdfs:comment "Links a hazard, visibility reduction, or physical barrier back to the specific road network, railway, or logistical route it impedes."@en .
+
+ffonto:isSuppressionDifficultyOf a owl:ObjectProperty ;
+    rdfs:label "is suppression difficulty of"@en ;
+    rdfs:comment "Connects a metric or qualitative assessment of firefighting challenge back to the specific terrain, fuel type, or weather condition causing it."@en .
+
+ffonto:isVisionModelScoresOf a owl:ObjectProperty ;
+    rdfs:label "is vision model scores of"@en ;
+    rdfs:comment "Links a set of confidence ratings or classification metrics back to the specific computer vision model that output them."@en .
+
+ffonto:isStructureLossStatusOf a owl:ObjectProperty ;
+    rdfs:label "is structure loss status of"@en ;
+    rdfs:comment "Connects a damage assessment or destroyed building count back to the specific wildfire incident or geographic area evaluated."@en .
+
+ffonto:hasResult a owl:ObjectProperty ;
+    rdfs:label "has result"@en ;
+    rdfs:comment "Links a process, computation, or physical event to its direct outcome, measurement, or consequential state."@en .
+
+ffonto:managedOf a owl:ObjectProperty ;
+    rdfs:label "managed of"@en ;
+    rdfs:comment "Relates an overseen incident, resource, or operational phase back to the commanding entity or agency responsible for it."@en .
+
+ffonto:producedBy a owl:ObjectProperty ;
+    rdfs:label "produced by"@en ;
+    rdfs:comment "Links an output, emission, physical artifact, or dataset back to the process, event, or entity that created it."@en .
+
+ffonto:communicatesBy a owl:ObjectProperty ;
+    rdfs:label "communicates by"@en ;
+    rdfs:comment "Connects a responder, system, or organization to the specific protocol, device, or network used to transmit information."@en .
+
+ffonto:hasModel a owl:ObjectProperty ;
+    rdfs:label "has model"@en ;
+    rdfs:comment "Relates a predictive system, research project, or hardware device to the specific computational framework or conceptual model it relies upon."@en .
+
+ffonto:usesDataFormatOf a owl:ObjectProperty ;
+    rdfs:label "uses data format of"@en ;
+    rdfs:comment "Links a specific file type, schema, or encoding standard back to the database, software, or data exchange process requiring it."@en .
+
+ffonto:isProvenanceRecordOf a owl:ObjectProperty ;
+    rdfs:label "is provenance record of"@en ;
+    rdfs:comment "Connects a specific historical log or metadata file back to the dataset, entity, or event it documents."@en .
+
+ffonto:isEnvironmentalConditionOf a owl:ObjectProperty ;
+    rdfs:label "is environmental condition of"@en ;
+    rdfs:comment "Links a specific weather state, fuel moisture level, or atmospheric metric back to the geographic region or incident it describes."@en .
+
+# =====================================================================
+# Datatype Properties (Attributes / Literals)
+# =====================================================================
+
+ffonto:gridY a owl:DatatypeProperty ;
+    rdfs:label "grid y"@en ;
+    rdfs:comment "Specifies the Y-coordinate or vertical index within a spatial grid system."@en .
+
+ffonto:gridX a owl:DatatypeProperty ;
+    rdfs:label "grid x"@en ;
+    rdfs:comment "Specifies the X-coordinate or horizontal index within a spatial grid system."@en .
+
+ffonto:labelType a owl:DatatypeProperty ;
+    rdfs:label "label type"@en ;
+    rdfs:comment "Specifies the classification category or semantic nature of a given annotation or data tag."@en .
+
+ffonto:audioDurationMs a owl:DatatypeProperty ;
+    rdfs:label "audio duration ms"@en ;
+    rdfs:comment "Records the total length of an acoustic sample or recording, measured in milliseconds."@en .
+
+ffonto:fireScore a owl:DatatypeProperty ;
+    rdfs:label "fire score"@en ;
+    rdfs:comment "Indicates a numerical value or confidence metric representing the likelihood or intensity of a detected fire."@en .
+
+ffonto:imageQualityCloudCover a owl:DatatypeProperty ;
+    rdfs:label "image quality cloud cover"@en ;
+    rdfs:comment "Quantifies the percentage or metric of an image obscured by atmospheric clouds, affecting visibility."@en .
+
+ffonto:labelSeverity a owl:DatatypeProperty ;
+    rdfs:label "label severity"@en ;
+    rdfs:comment "Indicates the level of intensity, danger, or urgency associated with a specific classification or alert."@en .
+
+ffonto:provenanceURI a owl:DatatypeProperty ;
+    rdfs:label "provenance URI"@en ;
+    rdfs:comment "Provides the standard Uniform Resource Identifier linking to the detailed origin and lineage metadata of a resource."@en .
+
+ffonto:imageQualityBlur a owl:DatatypeProperty ;
+    rdfs:label "image quality blur"@en ;
+    rdfs:comment "Quantifies the level of distortion or lack of sharpness in a visual dataset or photograph."@en .
+
+ffonto:crsLiteral a owl:DatatypeProperty ;
+    rdfs:label "CRS literal"@en ;
+    rdfs:comment "Specifies the Coordinate Reference System (e.g., EPSG code) used for spatial data as a literal string."@en .
+
+ffonto:smokeThreshold a owl:DatatypeProperty ;
+    rdfs:label "smoke threshold"@en ;
+    rdfs:comment "Defines the specific numerical boundary or concentration level at which a smoke detection alert is triggered."@en .
+
+ffonto:siteLiteral a owl:DatatypeProperty ;
+    rdfs:label "site literal"@en ;
+    rdfs:comment "Records the localized name, physical designation, or descriptive text of an observation station or facility."@en .
+
+ffonto:licenseText a owl:DatatypeProperty ;
+    rdfs:label "license text"@en ;
+    rdfs:comment "Provides the legal terms, attribution requirements, or usage rights string associated with a dataset or media asset."@en .
+
+ffonto:labelSourceLiteral a owl:DatatypeProperty ;
+    rdfs:label "label source literal"@en ;
+    rdfs:comment "Specifies the entity, system, or annotator responsible for generating a specific data tag, recorded as a text string."@en .
+
+ffonto:rowIndex a owl:DatatypeProperty ;
+    rdfs:label "row index"@en ;
+    rdfs:comment "Indicates the specific sequential line number or tabular position of a record within a dataset."@en .
+
+ffonto:rainMm a owl:DatatypeProperty ;
+    rdfs:label "rain mm"@en ;
+    rdfs:comment "Records the accumulated precipitation volume at a specific location, measured in millimeters."@en .
+
+ffonto:hasObservationSource a owl:DatatypeProperty ;
+    rdfs:label "has observation source"@en ;
+    rdfs:comment "Links a recorded metric or detected event to the original sensor, system, or human observer that provided the data."@en .
+
+ffonto:imageWidthPx a owl:DatatypeProperty ;
+    rdfs:label "image width px"@en ;
+    rdfs:comment "Specifies the horizontal dimension of a digital image or visual matrix, measured in pixels."@en .
+
+ffonto:provenanceChecksumSHA256 a owl:DatatypeProperty ;
+    rdfs:label "provenance checksum SHA256"@en ;
+    rdfs:comment "Records the SHA-256 cryptographic hash value used to verify the integrity and unchanged state of a digital asset."@en .
+
+ffonto:fireThreshold a owl:DatatypeProperty ;
+    rdfs:label "fire threshold"@en ;
+    rdfs:comment "Defines the specific thermal, visual, or algorithmic limit at which a system classifies an anomaly as a fire."@en .
+
+ffonto:captureTimeUTC a owl:DatatypeProperty ;
+    rdfs:label "capture time UTC"@en ;
+    rdfs:comment "Records the exact temporal instant an image, audio clip, or observation was recorded, standardized to Coordinated Universal Time."@en .
+
+ffonto:imageHeightPx a owl:DatatypeProperty ;
+    rdfs:label "image height px"@en ;
+    rdfs:comment "Specifies the vertical dimension of a digital image or visual matrix, measured in pixels."@en .
+
+ffonto:hasRecordConfidence a owl:DatatypeProperty ;
+    rdfs:label "has record confidence"@en ;
+    rdfs:comment "Indicates the statistical certainty or reliability score associated with a specific database entry or log."@en .
+
+ffonto:areaHa a owl:DatatypeProperty ;
+    rdfs:label "area ha"@en ;
+    rdfs:comment "Records the calculated spatial extent or geographic footprint of an entity or incident, measured in hectares."@en .
+
+ffonto:sourceLiteral a owl:DatatypeProperty ;
+    rdfs:label "source literal"@en ;
+    rdfs:comment "Specifies the origin, creating agency, or foundational system of a dataset or observation as a text string."@en .
+
+ffonto:classMapSHA1 a owl:DatatypeProperty ;
+    rdfs:label "class map SHA1"@en ;
+    rdfs:comment "Records the SHA-1 cryptographic hash value used to uniquely identify and verify a specific classification map or schema file."@en .
+
+ffonto:frameThreshold a owl:DatatypeProperty ;
+    rdfs:label "frame threshold"@en ;
+    rdfs:comment "Defines the required number or interval of sequential video frames or images needed to trigger a confirmed detection."@en .
+
+ffonto:fireOccurred a owl:DatatypeProperty ;
+    rdfs:label "fire occurred"@en ;
+    rdfs:comment "A boolean flag or categorical indicator recording whether a combustion event actually took place at a given location and time."@en .
+
+ffonto:smokeScore a owl:DatatypeProperty ;
+    rdfs:label "smoke score"@en ;
+    rdfs:comment "Indicates a numerical value or algorithmic confidence metric representing the likelihood or density of detected smoke."@en .
+
+ffonto:deviceID a owl:DatatypeProperty ;
+    rdfs:label "device ID"@en ;
+    rdfs:comment "Specifies the unique alphanumeric identifier or serial number assigned to a specific hardware sensor or tool."@en .
+
+ffonto:rawLabel a owl:DatatypeProperty ;
+    rdfs:label "raw label"@en ;
+    rdfs:comment "Records the original, unprocessed annotation or category tag assigned to data before standardization or transformation."@en .
+
+ffonto:globalDetectionThreshold a owl:DatatypeProperty ;
+    rdfs:label "global detection threshold"@en ;
+    rdfs:comment "Defines the overarching, system-wide baseline limit required to flag an anomaly or trigger an alert across all sensors."@en .
+
+ffonto:countryLiteral a owl:DatatypeProperty ;
+    rdfs:label "country literal"@en ;
+    rdfs:comment "Specifies the sovereign nation encompassing a geographic coordinate or incident as a text string."@en .
+
+ffonto:imageSourceLiteral a owl:DatatypeProperty ;
+    rdfs:label "image source literal"@en ;
+    rdfs:comment "Records the specific camera, satellite platform, or digital repository from which a visual asset was acquired."@en .
+
+ffonto:smokeScoreAboveThreshold a owl:DatatypeProperty ;
+    rdfs:label "smoke score above threshold"@en ;
+    rdfs:comment "A boolean flag or indicator denoting whether the calculated smoke density metric exceeds the established warning limit."@en .
+
+ffonto:resolutionM a owl:DatatypeProperty ;
+    rdfs:label "resolution m"@en ;
+    rdfs:comment "Specifies the spatial granularity or pixel size of a map, grid, or raster dataset, measured in meters."@en .
+
+ffonto:regionLiteral a owl:DatatypeProperty ;
+    rdfs:label "region literal"@en ;
+    rdfs:comment "Records the administrative state, province, or localized geographic area of an incident or observation as a text string."@en .
+
+ffonto:audioThreshold a owl:DatatypeProperty ;
+    rdfs:label "audio threshold"@en ;
+    rdfs:comment "Defines the acoustic decibel limit or anomaly score required for a sound-based sensor to trigger an alert."@en .
+
+ffonto:schemaVersion a owl:DatatypeProperty ;
+    rdfs:label "schema version"@en ;
+    rdfs:comment "Specifies the numeric or alphanumeric release identifier of the ontological or structural framework governing the dataset."@en .
+
+ffonto:labelConfidence a owl:DatatypeProperty ;
+    rdfs:label "label confidence"@en ;
+    rdfs:comment "Indicates the statistical probability or subjective certainty that a specific annotation or tag is correct."@en .
+
+ffonto:audioModel a owl:DatatypeProperty ;
+    rdfs:label "audio model"@en ;
+    rdfs:comment "Identifies the specific machine learning framework or algorithmic system used to process and classify acoustic data."@en .
+
+ffonto:opacity a owl:DatatypeProperty ;
+    rdfs:label "opacity"@en ;
+    rdfs:comment "Quantifies the degree to which an emission, such as a smoke plume, obscures visibility or blocks light transmission."@en .
+
+
+ffonto:DataAnalysisProcess rdfs:subClassOf prov:Activity .
+ffonto:UAVOperation rdfs:subClassOf prov:Activity .
+ffonto:PostFireRehabilitation rdfs:subClassOf prov:Activity .
+ffonto:LandManagementPractice rdfs:subClassOf prov:Activity .
+ffonto:PhysicalProcess rdfs:subClassOf prov:Activity .
+ffonto:EarthObservationData rdfs:subClassOf prov:Entity .
+ffonto:IncidentReport rdfs:subClassOf prov:Entity .
+ffonto:SimulationModel rdfs:subClassOf prov:Entity .
+ffonto:WildfireStatistic rdfs:subClassOf prov:Entity .
+ffonto:InformationSystem rdfs:subClassOf prov:Entity .
+ffonto:CommunityPreparednessPlan rdfs:subClassOf prov:Entity .
+ffonto:TemporalRecord rdfs:subClassOf ffonto:TemporalExtent .
+ffonto:ClimateEvent rdfs:subClassOf ffonto:TemporalExtent .
+ffonto:AirQualityMitigationDevice rdfs:subClassOf sosa:Platform .
+ffonto:CommunicationDevice rdfs:subClassOf sosa:Platform .
+ffonto:VegetationIndex rdfs:subClassOf ffonto:ObservableProperty .
+ffonto:AirPollutionMetric rdfs:subClassOf ffonto:ObservableProperty .
+ffonto:FireBehaviorMetric rdfs:subClassOf ffonto:ObservableProperty .
+ffonto:PredictionMetric rdfs:subClassOf ffonto:ObservableProperty .
+ffonto:OperationsSection rdfs:subClassOf ffonto:IncidentCommandSection .
+ffonto:PlanningSection rdfs:subClassOf ffonto:IncidentCommandSection .
+ffonto:SafetyOfficer rdfs:subClassOf ffonto:IncidentCommandRole .
+ffonto:EnvironmentalImpact rdfs:subClassOf ffonto:ForestFireEffect .
+ffonto:HealthImpact rdfs:subClassOf ffonto:ForestFireEffect .
+ffonto:VehicleDamage rdfs:subClassOf ffonto:ForestFireEffect .
+ffonto:ClimateFeedbackLoop rdfs:subClassOf ffonto:ClimatePattern .
+ffonto:AnthropogenicFactor rdfs:subClassOf ffonto:ClimatePattern .
+ffonto:mitigatesAirPollution a owl:ObjectProperty ;
+    rdfs:label "mitigates air pollution"@en ;
+    rdfs:comment "Relates an air quality mitigation strategy to the specific air pollution metric it addresses."@en ;
+    owl:inverseOf ffonto:isMitigatedByStrategy ;
+    rdfs:domain ffonto:AirQualityMitigationStrategy ;
+    rdfs:range ffonto:AirPollutionMetric .
+
+ffonto:isMitigatedByStrategy a owl:ObjectProperty ;
+    rdfs:label "is mitigated by strategy"@en ;
+    rdfs:comment "Inverse property indicating the mitigation strategy addressing an air pollution metric."@en ;
+    rdfs:range ffonto:AirQualityMitigationStrategy ;
+    rdfs:domain ffonto:AirPollutionMetric .
+
+ffonto:utilizesDevice a owl:ObjectProperty ;
+    rdfs:label "utilizes device"@en ;
+    rdfs:comment "Indicates the hardware or equipment utilized by an air quality mitigation strategy."@en ;
+    owl:inverseOf ffonto:isDeviceUtilizedBy ;
+    rdfs:domain ffonto:AirQualityMitigationStrategy ;
+    rdfs:range ffonto:AirQualityMitigationDevice .
+
+ffonto:isDeviceUtilizedBy a owl:ObjectProperty ;
+    rdfs:label "is device utilized by"@en ;
+    rdfs:comment "Inverse property linking a device to the mitigation strategy utilizing it."@en ;
+    rdfs:range ffonto:AirQualityMitigationStrategy ;
+    rdfs:domain ffonto:AirQualityMitigationDevice .
+
+ffonto:governsModel a owl:ObjectProperty ;
+    rdfs:label "governs model"@en ;
+    rdfs:comment "Connects an AI model governance framework to the MLOps pipeline it oversees."@en ;
+    owl:inverseOf ffonto:isModelGovernedBy ;
+    rdfs:domain ffonto:AIModelGovernance ;
+    rdfs:range ffonto:MLOpsPipeline .
+
+ffonto:isModelGovernedBy a owl:ObjectProperty ;
+    rdfs:label "is model governed by"@en ;
+    rdfs:comment "Inverse property linking an MLOps pipeline to its governing framework."@en ;
+    rdfs:range ffonto:AIModelGovernance ;
+    rdfs:domain ffonto:MLOpsPipeline .
+
+ffonto:reliesOnData a owl:ObjectProperty ;
+    rdfs:label "relies on data"@en ;
+    rdfs:comment "Specifies the earth observation data that a sensor fusion process relies upon."@en ;
+    owl:inverseOf ffonto:isDataReliedOnBy ;
+    rdfs:domain ffonto:SensorFusion ;
+    rdfs:range ffonto:EarthObservationData .
+
+ffonto:isDataReliedOnBy a owl:ObjectProperty ;
+    rdfs:label "is data relied on by"@en ;
+    rdfs:comment "Inverse property indicating the sensor fusion process that depends on specific observation data."@en ;
+    rdfs:range ffonto:SensorFusion ;
+    rdfs:domain ffonto:EarthObservationData .
+
+ffonto:guidesOperation a owl:ObjectProperty ;
+    rdfs:label "guides operation"@en ;
+    rdfs:comment "Relates an operational strategy to the specific operations section it guides."@en ;
+    owl:inverseOf ffonto:isOperationGuidedBy ;
+    rdfs:domain ffonto:OperationalStrategy ;
+    rdfs:range ffonto:OperationsSection .
+
+ffonto:isOperationGuidedBy a owl:ObjectProperty ;
+    rdfs:label "is operation guided by"@en ;
+    rdfs:comment "Inverse property linking an operations section to the strategy that guides it."@en ;
+    rdfs:range ffonto:OperationalStrategy ;
+    rdfs:domain ffonto:OperationsSection .
+
+ffonto:evaluatesOpportunity a owl:ObjectProperty ;
+    rdfs:label "evaluates opportunity"@en ;
+    rdfs:comment "Connects an ethical consideration to the challenge or opportunity it evaluates."@en ;
+    owl:inverseOf ffonto:isOpportunityEvaluatedBy ;
+    rdfs:domain ffonto:EthicalConsideration ;
+    rdfs:range ffonto:ChallengeOpportunity .
+
+ffonto:isOpportunityEvaluatedBy a owl:ObjectProperty ;
+    rdfs:label "is opportunity evaluated by"@en ;
+    rdfs:comment "Inverse property linking a challenge or opportunity back to its ethical consideration."@en ;
+    rdfs:range ffonto:EthicalConsideration ;
+    rdfs:domain ffonto:ChallengeOpportunity .
+
+ffonto:processesCloudCover a owl:ObjectProperty ;
+    rdfs:label "processes cloud cover"@en ;
+    rdfs:comment "Relates an atmospheric transport model to the cloud cover quality data it processes."@en ;
+    owl:inverseOf ffonto:isCloudCoverProcessedBy ;
+    rdfs:domain ffonto:AtmosphericTransportModel ;
+    rdfs:range ffonto:CloudCoverQuality .
+
+ffonto:isCloudCoverProcessedBy a owl:ObjectProperty ;
+    rdfs:label "is cloud cover processed by"@en ;
+    rdfs:comment "Inverse property indicating which atmospheric transport model processes the cloud cover quality."@en ;
+    rdfs:range ffonto:AtmosphericTransportModel ;
+    rdfs:domain ffonto:CloudCoverQuality .
+
+ffonto:incorporatesSidingData a owl:ObjectProperty ;
+    rdfs:label "incorporates siding data"@en ;
+    rdfs:comment "Links a simulation model to the exterior siding data it incorporates."@en ;
+    owl:inverseOf ffonto:isSidingDataIncorporatedIn ;
+    rdfs:domain ffonto:SimulationModel ;
+    rdfs:range ffonto:ExteriorSiding .
+
+ffonto:isSidingDataIncorporatedIn a owl:ObjectProperty ;
+    rdfs:label "is siding data incorporated in"@en ;
+    rdfs:comment "Inverse property linking exterior siding data to the simulation model using it."@en ;
+    rdfs:range ffonto:SimulationModel ;
+    rdfs:domain ffonto:ExteriorSiding .
+
+ffonto:causesEffect a owl:ObjectProperty ;
+    rdfs:label "causes effect"@en ;
+    rdfs:comment "Links a forest fire event to the specific environmental or socio-economic effects it causes."@en ;
+    owl:inverseOf ffonto:isEffectCausedBy ;
+    rdfs:domain ffonto:ForestFire ;
+    rdfs:range ffonto:ForestFireEffect .
+
+ffonto:isEffectCausedBy a owl:ObjectProperty ;
+    rdfs:label "is effect caused by"@en ;
+    rdfs:comment "Inverse property linking a resulting effect back to the forest fire that caused it."@en ;
+    rdfs:range ffonto:ForestFire ;
+    rdfs:domain ffonto:ForestFireEffect .
+
+ffonto:influencesFireBehavior a owl:ObjectProperty ;
+    rdfs:label "influences fire behavior"@en ;
+    rdfs:comment "Relates a prevailing climate pattern to the forest fire behavior it influences."@en ;
+    owl:inverseOf ffonto:isFireBehaviorInfluencedBy ;
+    rdfs:domain ffonto:ClimatePattern ;
+    rdfs:range ffonto:ForestFire .
+
+ffonto:isFireBehaviorInfluencedBy a owl:ObjectProperty ;
+    rdfs:label "is fire behavior influenced by"@en ;
+    rdfs:comment "Inverse property indicating the climate pattern that influenced a specific forest fire."@en ;
+    rdfs:range ffonto:ClimatePattern ;
+    rdfs:domain ffonto:ForestFire .
+
+ffonto:simulatedByActivity a owl:ObjectProperty ;
+    rdfs:label "simulated by activity"@en ;
+    rdfs:comment "Relates a forest fire to a provenance-tracked modeling or simulation activity."@en ;
+    owl:inverseOf ffonto:simulatesFire ;
+    rdfs:domain ffonto:ForestFire ;
+    rdfs:range prov:Activity .
+
+ffonto:simulatesFire a owl:ObjectProperty ;
+    rdfs:label "simulates fire"@en ;
+    rdfs:comment "Inverse property linking a computational or analytical activity to the fire it simulates."@en ;
+    rdfs:range ffonto:ForestFire ;
+    rdfs:domain prov:Activity .
+
+ffonto:generatesDataEntity a owl:ObjectProperty ;
+    rdfs:label "generates data entity"@en ;
+    rdfs:comment "Links a processing activity to the provenance entity (e.g., report, dataset) it produces."@en ;
+    owl:inverseOf ffonto:isDataEntityGeneratedBy ;
+    rdfs:domain prov:Activity ;
+    rdfs:range prov:Entity .
+
+ffonto:isDataEntityGeneratedBy a owl:ObjectProperty ;
+    rdfs:label "is data entity generated by"@en ;
+    rdfs:comment "Inverse property linking a data entity back to the activity that generated it."@en ;
+    rdfs:range prov:Activity ;
+    rdfs:domain prov:Entity .
+
+ffonto:managedBySection a owl:ObjectProperty ;
+    rdfs:label "managed by section"@en ;
+    rdfs:comment "Links a forest fire to the specific Incident Command Section managing its response."@en ;
+    owl:inverseOf ffonto:managesFireEvent ;
+    rdfs:domain ffonto:ForestFire ;
+    rdfs:range ffonto:IncidentCommandSection .
+
+ffonto:managesFireEvent a owl:ObjectProperty ;
+    rdfs:label "manages fire event"@en ;
+    rdfs:comment "Inverse property linking an Incident Command Section to the forest fire it is actively managing."@en ;
+    rdfs:range ffonto:ForestFire ;
+    rdfs:domain ffonto:IncidentCommandSection .
+
+ffonto:includesCommandRole a owl:ObjectProperty ;
+    rdfs:label "includes command role"@en ;
+    rdfs:comment "Relates an Incident Command Section to the specific personnel roles assigned within it."@en ;
+    owl:inverseOf ffonto:assignedToSection ;
+    rdfs:domain ffonto:IncidentCommandSection ;
+    rdfs:range ffonto:IncidentCommandRole .
+
+ffonto:assignedToSection a owl:ObjectProperty ;
+    rdfs:label "assigned to section"@en ;
+    rdfs:comment "Inverse property mapping an Incident Command Role to its encompassing section."@en ;
+    rdfs:range ffonto:IncidentCommandSection ;
+    rdfs:domain ffonto:IncidentCommandRole .
+
+ffonto:operatesFromFacility a owl:ObjectProperty ;
+    rdfs:label "operates from facility"@en ;
+    rdfs:comment "Links an Incident Command Section to the physical emergency facility (e.g., basecamp) it operates from."@en ;
+    owl:inverseOf ffonto:isFacilityOperatedBy ;
+    rdfs:domain ffonto:IncidentCommandSection ;
+    rdfs:range ffonto:EmergencyFacility .
+
+ffonto:isFacilityOperatedBy a owl:ObjectProperty ;
+    rdfs:label "is facility operated by"@en ;
+    rdfs:comment "Inverse property linking an emergency facility to the command section utilizing it."@en ;
+    rdfs:range ffonto:IncidentCommandSection ;
+    rdfs:domain ffonto:EmergencyFacility .
+
+ffonto:deploysPlatform a owl:ObjectProperty ;
+    rdfs:label "deploys platform"@en ;
+    rdfs:comment "Indicates the observational platform (e.g., drone, tower) deployed by an incident command section."@en ;
+    owl:inverseOf ffonto:isPlatformDeployedBy ;
+    rdfs:domain ffonto:IncidentCommandSection ;
+    rdfs:range sosa:Platform .
+
+ffonto:isPlatformDeployedBy a owl:ObjectProperty ;
+    rdfs:label "is platform deployed by"@en ;
+    rdfs:comment "Inverse property linking a sensor platform back to the command section that deployed it."@en ;
+    rdfs:range ffonto:IncidentCommandSection ;
+    rdfs:domain sosa:Platform .
+
+ffonto:implementsRollback a owl:ObjectProperty ;
+    rdfs:label "implements rollback"@en ;
+    rdfs:comment "Connects an MLOps Pipeline to its corresponding data or model rollback strategy."@en ;
+    owl:inverseOf ffonto:isRollbackImplementedBy ;
+    rdfs:domain ffonto:MLOpsPipeline ;
+    rdfs:range ffonto:RollbackStrategy .
+
+ffonto:isRollbackImplementedBy a owl:ObjectProperty ;
+    rdfs:label "is rollback implemented by"@en ;
+    rdfs:comment "Inverse property linking a rollback strategy to the MLOps pipeline executing it."@en ;
+    rdfs:range ffonto:MLOpsPipeline ;
+    rdfs:domain ffonto:RollbackStrategy .
